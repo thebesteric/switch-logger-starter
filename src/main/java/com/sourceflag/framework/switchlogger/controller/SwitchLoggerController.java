@@ -1,6 +1,6 @@
 package com.sourceflag.framework.switchlogger.controller;
 
-import com.google.common.cache.Cache;
+import com.github.benmanes.caffeine.cache.Cache;
 import com.sourceflag.framework.switchlogger.starter.SwitchLoggerProperties;
 import com.sourceflag.framework.switchlogger.utils.JedisUtils;
 import com.sourceflag.framework.switchlogger.utils.SwitchJdbcTemplate;

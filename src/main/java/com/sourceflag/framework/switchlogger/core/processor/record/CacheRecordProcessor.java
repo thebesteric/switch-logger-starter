@@ -1,6 +1,6 @@
 package com.sourceflag.framework.switchlogger.core.processor.record;
 
-import com.google.common.cache.Cache;
+import com.github.benmanes.caffeine.cache.Cache;
 import com.sourceflag.framework.switchlogger.core.RequestLog;
 import com.sourceflag.framework.switchlogger.core.processor.RecordProcessor;
 import com.sourceflag.framework.switchlogger.starter.SwitchLoggerProperties;

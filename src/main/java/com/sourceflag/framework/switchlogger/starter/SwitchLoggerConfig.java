@@ -1,8 +1,8 @@
 package com.sourceflag.framework.switchlogger.starter;
 
 import com.alibaba.druid.pool.DruidDataSource;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.sourceflag.framework.switchlogger.controller.SwitchLoggerController;
 import com.sourceflag.framework.switchlogger.core.SwitchLoggerFilter;
 import com.sourceflag.framework.switchlogger.core.SwitchLoggerInitialization;
@@ -184,7 +184,7 @@ public class SwitchLoggerConfig {
     @Qualifier("switchLoggerCache")
     @Conditional(SwitchLoggerCacheMarker.class)
     public Cache<String, Object> switchLoggerCache(SwitchLoggerProperties properties) {
-        return CacheBuilder.newBuilder()
+        return Caffeine.newBuilder()
                 .initialCapacity(properties.getCache().getInitialCapacity())
                 .maximumSize(properties.getCache().getMaximumSize())
                 .expireAfterWrite(properties.getCache().getExpiredTime(), TimeUnit.SECONDS)
