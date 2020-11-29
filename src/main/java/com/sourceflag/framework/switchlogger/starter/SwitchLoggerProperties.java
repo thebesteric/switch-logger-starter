@@ -4,7 +4,7 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * SwitchLoggerConfig
+ * SwitchLoggerProperties
  *
  * @author Eric Joe
  * @version 1.0
@@ -12,11 +12,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @since 1.0
  */
 @Data
-@ConfigurationProperties(prefix = "switch.logger")
+@ConfigurationProperties(prefix = "sourceflag.switch.logger")
 public class SwitchLoggerProperties {
 
     public enum ModelType {
-        LOG, CACHE, REDIS, ES, DATABASE
+        LOG, STDOUT, CACHE, REDIS, ES, DATABASE
     }
 
     private boolean enable = true;
@@ -34,6 +34,9 @@ public class SwitchLoggerProperties {
 
     @Data
     public static class Filter {
+        private String name = "SwitchLoggerFilter";
+        private int order = 1;
+        private String[] urlPatterns = {"/*"};
         private String[] include = {".*"};
         private String[] exclude = {};
     }

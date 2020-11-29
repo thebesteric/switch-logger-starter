@@ -136,7 +136,9 @@ public class SwitchLoggerInitialization implements SmartLifecycle, ApplicationCo
         }
 
         // print url_mapping to console
-        SwitchLoggerFilterWrapper.URL_MAPPING.forEach((k, v) -> log.info("SCAN {} => {}", k, v.getName()));
+        if (log.isTraceEnabled()) {
+            SwitchLoggerFilterWrapper.URL_MAPPING.forEach((k, v) -> log.info("SWITCH LOGGER SCAN {} => {}", k, v.getName()));
+        }
     }
 
     @Override

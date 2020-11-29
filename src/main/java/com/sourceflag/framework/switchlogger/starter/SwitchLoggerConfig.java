@@ -13,10 +13,7 @@ import com.sourceflag.framework.switchlogger.core.marker.SwitchLoggerRedisMarker
 import com.sourceflag.framework.switchlogger.core.processor.MappingProcessor;
 import com.sourceflag.framework.switchlogger.core.processor.RecordProcessor;
 import com.sourceflag.framework.switchlogger.core.processor.mapping.*;
-import com.sourceflag.framework.switchlogger.core.processor.record.CacheRecordProcessor;
-import com.sourceflag.framework.switchlogger.core.processor.record.DatabaseRecordProcessor;
-import com.sourceflag.framework.switchlogger.core.processor.record.LogRecordProcessor;
-import com.sourceflag.framework.switchlogger.core.processor.record.RedisRecordProcessor;
+import com.sourceflag.framework.switchlogger.core.processor.record.*;
 import com.sourceflag.framework.switchlogger.utils.JedisUtils;
 import com.sourceflag.framework.switchlogger.utils.SwitchJdbcTemplate;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -57,14 +54,14 @@ public class SwitchLoggerConfig {
     @Resource
     private Environment environment;
 
-    @Bean
+    @Bean(name = "switchLoggerFilterRegister")
     @SuppressWarnings({"unchecked", "rawtypes"})
     public FilterRegistrationBean filterRegister(SwitchLoggerProperties properties, List<RecordProcessor> recordProcessors) {
         FilterRegistrationBean frBean = new FilterRegistrationBean();
-        frBean.setName("SwitchLoggerFilter");
+        frBean.setName(properties.getFilter().getName());
         frBean.setFilter(new SwitchLoggerFilter(properties, recordProcessors));
-        frBean.setOrder(1);
-        frBean.addUrlPatterns("/*");
+        frBean.setOrder(properties.getFilter().getOrder());
+        frBean.addUrlPatterns(properties.getFilter().getUrlPatterns());
         return frBean;
     }
 
@@ -125,41 +122,46 @@ public class SwitchLoggerConfig {
 
     // MappingProcessor
 
-    @Bean
+    @Bean(name = "switchLoggerRequestMappingProcessor")
     public MappingProcessor requestMappingProcessor() {
         return new RequestMappingProcessor();
     }
 
-    @Bean
+    @Bean(name = "switchLoggerDeleteMappingProcessor")
     public MappingProcessor deleteMappingProcessor() {
         return new DeleteMappingProcessor();
     }
 
-    @Bean
+    @Bean(name = "switchLoggerGetMappingProcessor")
     public MappingProcessor getMappingProcessor() {
         return new GetMappingProcessor();
     }
 
-    @Bean
+    @Bean(name = "switchLoggerPatchMappingProcessor")
     public MappingProcessor patchMappingProcessor() {
         return new PatchMappingProcessor();
     }
 
-    @Bean
+    @Bean(name = "switchLoggerPostMappingProcessor")
     public MappingProcessor postMappingProcessor() {
         return new PostMappingProcessor();
     }
 
-    @Bean
+    @Bean(name = "switchLoggerPutMappingProcessor")
     public PutMappingProcessor putMappingProcessor() {
         return new PutMappingProcessor();
     }
 
     // RecordProcessor
 
-    @Bean
+    @Bean(name = "switchLoggerLogRecordProcessor")
     public RecordProcessor logRecordProcessor() {
         return new LogRecordProcessor();
+    }
+
+    @Bean(name = "switchLoggerStdoutRecordProcessor")
+    public RecordProcessor stdoutRecordProcessor() {
+        return new StdoutRecordProcessor();
     }
 
     @Bean

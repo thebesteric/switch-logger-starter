@@ -3,7 +3,6 @@ package com.sourceflag.framework.switchlogger.core.marker;
 import org.springframework.context.annotation.Condition;
 import org.springframework.context.annotation.ConditionContext;
 import org.springframework.core.env.Environment;
-import org.springframework.core.type.AnnotatedTypeMetadata;
 
 /**
  * AbstractSwitchLoggerMarker
@@ -17,7 +16,7 @@ public interface SwitchLoggerMarker extends Condition {
 
     default String getLoggerModel(ConditionContext context) {
         Environment environment = context.getEnvironment();
-        return environment.getProperty("switch.logger.model");
+        return environment.getProperty("sourceflag.switch.logger.model");
     }
 
 }
