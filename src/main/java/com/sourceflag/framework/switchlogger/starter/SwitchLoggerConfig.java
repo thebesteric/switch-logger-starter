@@ -4,6 +4,7 @@ import com.alibaba.druid.pool.DruidDataSource;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.sourceflag.framework.switchlogger.controller.SwitchLoggerController;
+import com.sourceflag.framework.switchlogger.core.RequestLog;
 import com.sourceflag.framework.switchlogger.core.SwitchLoggerFilter;
 import com.sourceflag.framework.switchlogger.core.SwitchLoggerInitialization;
 import com.sourceflag.framework.switchlogger.core.exception.ParseErrorException;
@@ -12,8 +13,11 @@ import com.sourceflag.framework.switchlogger.core.marker.SwitchLoggerDatabaseMar
 import com.sourceflag.framework.switchlogger.core.marker.SwitchLoggerRedisMarker;
 import com.sourceflag.framework.switchlogger.core.processor.MappingProcessor;
 import com.sourceflag.framework.switchlogger.core.processor.RecordProcessor;
+import com.sourceflag.framework.switchlogger.core.processor.RequestLoggerProcessor;
 import com.sourceflag.framework.switchlogger.core.processor.mapping.*;
 import com.sourceflag.framework.switchlogger.core.processor.record.*;
+import com.sourceflag.framework.switchlogger.core.wrapper.SwitchLoggerRequestWrapper;
+import com.sourceflag.framework.switchlogger.core.wrapper.SwitchLoggerResponseWrapper;
 import com.sourceflag.framework.switchlogger.utils.JedisUtils;
 import com.sourceflag.framework.switchlogger.utils.SwitchJdbcTemplate;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -26,12 +30,16 @@ import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.annotation.EnableAsync;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
 import javax.annotation.Resource;
+import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -56,10 +64,10 @@ public class SwitchLoggerConfig {
 
     @Bean(name = "switchLoggerFilterRegister")
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public FilterRegistrationBean filterRegister(SwitchLoggerProperties properties, List<RecordProcessor> recordProcessors) {
+    public FilterRegistrationBean filterRegister(SwitchLoggerProperties properties, List<RecordProcessor> recordProcessors, @Nullable RequestLoggerProcessor requestLoggerProcessor) {
         FilterRegistrationBean frBean = new FilterRegistrationBean();
         frBean.setName(properties.getFilter().getName());
-        frBean.setFilter(new SwitchLoggerFilter(properties, recordProcessors));
+        frBean.setFilter(new SwitchLoggerFilter(properties, recordProcessors, requestLoggerProcessor));
         frBean.setOrder(properties.getFilter().getOrder());
         frBean.addUrlPatterns(properties.getFilter().getUrlPatterns());
         return frBean;
@@ -154,11 +162,13 @@ public class SwitchLoggerConfig {
 
     // RecordProcessor
 
+    // byDefault
     @Bean(name = "switchLoggerLogRecordProcessor")
     public RecordProcessor logRecordProcessor() {
         return new LogRecordProcessor();
     }
 
+    // byDefault
     @Bean(name = "switchLoggerStdoutRecordProcessor")
     public RecordProcessor stdoutRecordProcessor() {
         return new StdoutRecordProcessor();

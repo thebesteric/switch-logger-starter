@@ -1,6 +1,7 @@
 package com.sourceflag.framework.switchlogger.core;
 
 import com.sourceflag.framework.switchlogger.core.processor.RecordProcessor;
+import com.sourceflag.framework.switchlogger.core.processor.RequestLoggerProcessor;
 import com.sourceflag.framework.switchlogger.core.wrapper.SwitchLoggerFilterWrapper;
 import com.sourceflag.framework.switchlogger.core.wrapper.SwitchLoggerRequestWrapper;
 import com.sourceflag.framework.switchlogger.core.wrapper.SwitchLoggerResponseWrapper;
@@ -18,6 +19,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
@@ -37,6 +39,8 @@ public class SwitchLoggerFilter extends SwitchLoggerFilterWrapper {
     private final SwitchLoggerProperties properties;
 
     private final List<RecordProcessor> recordProcessors;
+
+    private final RequestLoggerProcessor requestLoggerProcessor;
 
     private static final Set<String> IGNORE_URIS = new HashSet<>();
 
@@ -81,21 +85,10 @@ public class SwitchLoggerFilter extends SwitchLoggerFilterWrapper {
             ex.printStackTrace();
             responseWrapper.setBuffer(ex.getMessage());
         }
-
         long duration = DurationWatch.stop();
 
         // record request info
-        RequestLog requestLog = new RequestLog(requestWrapper, responseWrapper);
-        try {
-            requestLog.setResult(JsonUtils.mapper.readTree(requestLog.getResult().toString()));
-        } catch (Exception ex) {
-            log.debug("cannot parse {} to json", requestLog.getResult());
-        }
-
-        Method method = URL_MAPPING.get(requestLog.getUri());
-        if (method != null) {
-            requestLog.setExecuteInfo(new RequestLog.ExecuteInfo(method, DurationWatch.getStartTime(), duration));
-        }
+        RequestLog requestLog = generateRequestLoggerProcessor().processor(requestWrapper, responseWrapper, URL_MAPPING, duration);
 
         // recorder request log
         for (RecordProcessor recordProcessor : recordProcessors) {
@@ -111,11 +104,31 @@ public class SwitchLoggerFilter extends SwitchLoggerFilterWrapper {
 
     }
 
-    public boolean checkLegalUri(String targetUri) {
+    private RequestLoggerProcessor generateRequestLoggerProcessor() {
+        if (requestLoggerProcessor == null) {
+            return (requestWrapper, responseWrapper, mapping, duration) -> {
+                RequestLog requestLog = new RequestLog(requestWrapper, responseWrapper);
+                try {
+                    requestLog.setResult(JsonUtils.mapper.readTree(requestLog.getResult().toString()));
+                } catch (Exception ex) {
+                    log.debug("cannot parse {} to json", requestLog.getResult());
+                }
+                Method method = mapping.get(requestLog.getUri());
+                if (method != null) {
+                    requestLog.setExecuteInfo(new RequestLog.ExecuteInfo(method, DurationWatch.getStartTime(), duration));
+                }
+                return requestLog;
+            };
+        }
+        return requestLoggerProcessor;
+
+    }
+
+    private boolean checkLegalUri(String targetUri) {
         return !doCheckLegalUri(targetUri, true) && doCheckLegalUri(targetUri, false);
     }
 
-    public boolean doCheckLegalUri(String targetUri, boolean include) {
+    private boolean doCheckLegalUri(String targetUri, boolean include) {
         boolean passed = false;
         String[] uris = include ? properties.getFilter().getInclude() : properties.getFilter().getExclude();
         if (uris != null && uris.length > 0) {

@@ -1,5 +1,7 @@
 package com.sourceflag.framework.switchlogger.core.wrapper;
 
+import com.sourceflag.framework.switchlogger.core.RequestLog;
+
 import javax.servlet.Filter;
 import java.lang.reflect.Method;
 import java.util.Map;

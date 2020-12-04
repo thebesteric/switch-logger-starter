@@ -1,10 +1,8 @@
 package com.sourceflag.framework.switchlogger.core.wrapper;
 
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sourceflag.framework.switchlogger.utils.JsonUtils;
+import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
 
 import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
@@ -29,16 +27,22 @@ public class SwitchLoggerRequestWrapper extends HttpServletRequestWrapper {
 
     private final byte[] body;
 
-    public SwitchLoggerRequestWrapper(HttpServletRequest request) throws IOException {
+    public SwitchLoggerRequestWrapper(HttpServletRequest request) {
         super(request);
-        try (BufferedReader reader = request.getReader()) {
-            StringBuilder sb = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                sb.append(line);
+        byte[] temp = null;
+        if (!ServletFileUpload.isMultipartContent(request)) {
+            try (BufferedReader reader = request.getReader()) {
+                StringBuilder sb = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line);
+                }
+                temp = sb.toString().getBytes();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            body = sb.toString().getBytes();
         }
+        body = temp;
     }
 
     public Object getBody() {
@@ -78,7 +82,7 @@ public class SwitchLoggerRequestWrapper extends HttpServletRequestWrapper {
             }
 
             @Override
-            public int read() throws IOException {
+            public int read() {
                 return byteArrayInputStream.read();
             }
         };
