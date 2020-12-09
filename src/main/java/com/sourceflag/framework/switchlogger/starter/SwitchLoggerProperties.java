@@ -21,7 +21,8 @@ public class SwitchLoggerProperties {
 
     private boolean enable = true;
 
-    // log, redis, es, mysql
+    private String[] compilePath = {"target\\classes", "build\\classes\\java\\main"};
+
     private String model = ModelType.LOG.name();
 
     private Redis redis = new Redis();

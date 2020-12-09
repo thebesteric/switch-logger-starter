@@ -1,10 +1,10 @@
 package com.sourceflag.framework.switchlogger.core.wrapper;
 
-import com.sourceflag.framework.switchlogger.core.RequestLog;
-
 import javax.servlet.Filter;
 import java.lang.reflect.Method;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -17,6 +17,6 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public abstract class SwitchLoggerFilterWrapper implements Filter {
 
-    public static final Map<String, Method> URL_MAPPING = new ConcurrentHashMap<>();
+    public static final Map<String, Method> URL_MAPPING = new ConcurrentHashMap<>(16);
 
 }

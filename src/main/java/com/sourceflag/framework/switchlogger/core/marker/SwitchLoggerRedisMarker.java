@@ -3,6 +3,7 @@ package com.sourceflag.framework.switchlogger.core.marker;
 import com.sourceflag.framework.switchlogger.starter.SwitchLoggerProperties;
 import org.springframework.context.annotation.ConditionContext;
 import org.springframework.core.type.AnnotatedTypeMetadata;
+import org.springframework.lang.NonNull;
 
 /**
  * SwitchLoggerReidsMarker
@@ -14,7 +15,7 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
  */
 public class SwitchLoggerRedisMarker implements SwitchLoggerMarker {
     @Override
-    public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+    public boolean matches(@NonNull ConditionContext context, @NonNull AnnotatedTypeMetadata metadata) {
         return SwitchLoggerProperties.ModelType.REDIS.name().equalsIgnoreCase(getLoggerModel(context));
     }
 }

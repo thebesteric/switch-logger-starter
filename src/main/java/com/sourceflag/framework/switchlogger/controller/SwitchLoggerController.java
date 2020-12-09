@@ -2,10 +2,10 @@ package com.sourceflag.framework.switchlogger.controller;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.sourceflag.framework.switchlogger.starter.SwitchLoggerProperties;
-import com.sourceflag.framework.switchlogger.utils.JedisUtils;
 import com.sourceflag.framework.switchlogger.utils.SwitchJdbcTemplate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationContext;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -29,6 +29,7 @@ public class SwitchLoggerController {
     public final ApplicationContext context;
 
     @GetMapping("/query")
+    @SuppressWarnings("unchecked")
     public Object query(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "50") int size) throws SQLException {
         SwitchLoggerProperties properties = properties();
         String model = properties.getModel();
@@ -37,7 +38,7 @@ public class SwitchLoggerController {
         } else if (SwitchLoggerProperties.ModelType.REDIS.name().equalsIgnoreCase(model)) {
             long start = (page - 1) * size;
             long end = start + size - 1;
-            return jedisUtils().zrange(properties.getRedis().getDatabase(), properties.getRedis().getKey(), start, end, true);
+            return redisTemplate().opsForZSet().range(properties.getRedis().getKey(), start, end);
         } else if (SwitchLoggerProperties.ModelType.DATABASE.name().equalsIgnoreCase(model)) {
             return jdbcTemplate().page(properties().getDatabase().getTableName(), page, size);
         }
@@ -53,8 +54,9 @@ public class SwitchLoggerController {
         return context.getBean(Cache.class);
     }
 
-    public JedisUtils jedisUtils() {
-        return context.getBean(JedisUtils.class);
+    @SuppressWarnings("rawtypes")
+    public RedisTemplate redisTemplate() {
+        return context.getBean(RedisTemplate.class);
     }
 
     public SwitchJdbcTemplate jdbcTemplate() {

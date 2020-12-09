@@ -16,6 +16,19 @@ import java.util.Map;
  * @date 2020-12-03 01:09
  * @since 1.0
  */
+@FunctionalInterface
 public interface RequestLoggerProcessor {
+
+    /**
+     * RequestLoggerProcessor
+     *
+     * @param requestWrapper  requestWrapper
+     * @param responseWrapper responseWrapper
+     * @param mapping         mapping
+     * @param duration        duration
+     * @return com.sourceflag.framework.switchlogger.core.RequestLog
+     * @author Eric
+     * @date 2020/12/9 17:04
+     */
     RequestLog processor(SwitchLoggerRequestWrapper requestWrapper, SwitchLoggerResponseWrapper responseWrapper, Map<String, Method> mapping, long duration) throws IOException;
 }

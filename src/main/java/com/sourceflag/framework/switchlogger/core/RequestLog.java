@@ -4,9 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sourceflag.framework.switchlogger.annotation.Column;
 import com.sourceflag.framework.switchlogger.core.wrapper.SwitchLoggerRequestWrapper;
 import com.sourceflag.framework.switchlogger.core.wrapper.SwitchLoggerResponseWrapper;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -49,6 +47,9 @@ public class RequestLog extends AbstractEntity {
             String headerName = headerNames.nextElement();
             String headerValue = requestWrapper.getHeader(headerName);
             this.getHeaders().put(headerName, headerValue);
+            if ("track_id".equalsIgnoreCase(headerName) || "track-id".equalsIgnoreCase(headerName)) {
+                this.trackId = headerValue;
+            }
         }
 
         // cookies
@@ -60,8 +61,10 @@ public class RequestLog extends AbstractEntity {
         }
 
         // body
-        Object body = requestWrapper.getBody();
-        this.setBody(body);
+        this.body = requestWrapper.getBody();
+
+        // originBody
+        this.originBody = requestWrapper.getOriginBody();
 
         // result
         byte[] bytes = responseWrapper.getByteArray();
@@ -149,12 +152,18 @@ public class RequestLog extends AbstractEntity {
     @Column(type = "json")
     private Object body;
 
+    @JsonProperty("origin_body")
+    @Column(length = 2048)
+    private String originBody;
+
     @Column(type = "json")
     private Object result;
 
     @JsonProperty("execute_info")
     @Column(type = "json")
     private ExecuteInfo executeInfo;
+
+    private Object extra;
 
     @Getter
     @Setter
@@ -201,8 +210,8 @@ public class RequestLog extends AbstractEntity {
 
     }
 
-    @Getter
-    @Setter
+    @Data
+    @EqualsAndHashCode(callSuper = true)
     @NoArgsConstructor
     public static class Cookie extends AbstractEntity {
 
@@ -219,21 +228,13 @@ public class RequestLog extends AbstractEntity {
         }
 
         private String name;
-
         private String value;
-
         private String comment;
-
         private String domain;
-
         private int maxAge = -1;
-
         private String path;
-
         private boolean secure;
-
         private int version = 0;
-
         private boolean isHttpOnly = false;
 
     }

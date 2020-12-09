@@ -1,7 +1,6 @@
 package com.sourceflag.framework.switchlogger.core.processor.mapping;
 
 import com.sourceflag.framework.switchlogger.core.processor.MappingProcessor;
-import com.sourceflag.framework.switchlogger.core.wrapper.SwitchLoggerFilterWrapper;
 import org.springframework.web.bind.annotation.DeleteMapping;
 
 import java.lang.reflect.Method;
@@ -29,10 +28,7 @@ public class DeleteMappingProcessor implements MappingProcessor {
         if (classRequestMappingUrls != null && classRequestMappingUrls.length > 0) {
             for (String classRequestMappingUrl : classRequestMappingUrls) {
                 String[] methodRequestMappingUrls = method.getAnnotation(DeleteMapping.class).value();
-                for (String methodRequestMappingUrl : methodRequestMappingUrls) {
-                    String url = classRequestMappingUrl + methodRequestMappingUrl;
-                    SwitchLoggerFilterWrapper.URL_MAPPING.put(url, method);
-                }
+                doProcessor(methodRequestMappingUrls, classRequestMappingUrl, method);
             }
         }
     }

@@ -9,11 +9,13 @@ import com.sourceflag.framework.switchlogger.utils.ObjectUtils;
 import com.sourceflag.framework.switchlogger.utils.SwitchJdbcTemplate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,7 +32,9 @@ import java.sql.ResultSet;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Objects;
-import java.util.Timer;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -70,11 +74,12 @@ public class SwitchLoggerInitialization implements SmartLifecycle, ApplicationCo
         if (SwitchLoggerProperties.ModelType.REDIS.name().equalsIgnoreCase(model)) {
             int expiredTime = properties.getRedis().getExpiredTime();
             if (expiredTime >= 0) {
-                Timer timer = new Timer();
-                timer.schedule(getBean(RedisRecordProcessor.class), 0, expiredTime * 1000 / 4);
+                ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(1,
+                        new BasicThreadFactory.Builder().namingPattern("redis-record-schedule-pool-%d").daemon(true).build());
+                executorService.scheduleAtFixedRate(getBean(RedisRecordProcessor.class), 0, expiredTime * 1000 / 4, TimeUnit.SECONDS);
             }
         } else if (SwitchLoggerProperties.ModelType.DATABASE.name().equalsIgnoreCase(model)) {
-            if (properties.getDatabase().getType().equalsIgnoreCase("mysql")) {
+            if ("mysql".equalsIgnoreCase(properties.getDatabase().getType())) {
                 try {
                     SwitchJdbcTemplate jdbcTemplate = getBean(SwitchJdbcTemplate.class);
                     String tableName = properties.getDatabase().getTableName();
@@ -112,9 +117,9 @@ public class SwitchLoggerInitialization implements SmartLifecycle, ApplicationCo
 
         URL url = Thread.currentThread().getContextClassLoader().getResource("");
         if (url != null) {
-            if (url.getProtocol().equals("file")) {
+            if ("file".equals(url.getProtocol())) {
                 doScan(new File(projectPath + "/"));
-            } else if (url.getProtocol().equals("jar")) {
+            } else if ("jar".equals(url.getProtocol())) {
                 try {
                     JarURLConnection connection = (JarURLConnection) url.openConnection();
                     JarFile jarFile = connection.getJarFile();
@@ -176,10 +181,9 @@ public class SwitchLoggerInitialization implements SmartLifecycle, ApplicationCo
         } else {
             String filePath = file.getPath();
             int index = filePath.lastIndexOf(".");
-            if (index != -1 && filePath.substring(index).equals(".class")) {
-                int i = filePath.indexOf("target\\classes");
-                if (i != -1) {
-                    filePath = filePath.substring(i + 15);
+            if (index != -1 && ".class".equals(filePath.substring(index))) {
+                filePath = extractLegalFilePath(filePath);
+                if (filePath != null) {
                     String classPath = filePath.replaceAll("\\\\", ".");
                     String className = classPath.substring(0, classPath.lastIndexOf("."));
                     processClassFile(className);
@@ -189,7 +193,7 @@ public class SwitchLoggerInitialization implements SmartLifecycle, ApplicationCo
     }
 
     @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+    public void setApplicationContext(@NonNull ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = (GenericApplicationContext) applicationContext;
     }
 
@@ -213,6 +217,17 @@ public class SwitchLoggerInitialization implements SmartLifecycle, ApplicationCo
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
+    }
+
+    private String extractLegalFilePath(String filePath) {
+        int index = -1;
+        for (String compilePath : properties.getCompilePath()) {
+            index = filePath.indexOf(compilePath);
+            if (index != -1) {
+                return filePath.substring(index + compilePath.length() + 1);
+            }
+        }
+        return null;
     }
 
     private <T> T getBean(Class<T> clazz) {

@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Condition;
 import org.springframework.context.annotation.ConditionContext;
 import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotatedTypeMetadata;
+import org.springframework.lang.NonNull;
 
 /**
  * SwitchLoggerCacheMarker
@@ -17,7 +18,7 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
 public class SwitchLoggerCacheMarker implements SwitchLoggerMarker {
 
     @Override
-    public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+    public boolean matches(@NonNull ConditionContext context, @NonNull AnnotatedTypeMetadata metadata) {
         return SwitchLoggerProperties.ModelType.CACHE.name().equalsIgnoreCase(getLoggerModel(context));
     }
 }

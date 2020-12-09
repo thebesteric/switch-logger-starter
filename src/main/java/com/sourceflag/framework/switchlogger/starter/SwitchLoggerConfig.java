@@ -1,24 +1,27 @@
 package com.sourceflag.framework.switchlogger.starter;
 
 import com.alibaba.druid.pool.DruidDataSource;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.sourceflag.framework.switchlogger.controller.SwitchLoggerController;
-import com.sourceflag.framework.switchlogger.core.RequestLog;
 import com.sourceflag.framework.switchlogger.core.SwitchLoggerFilter;
 import com.sourceflag.framework.switchlogger.core.SwitchLoggerInitialization;
 import com.sourceflag.framework.switchlogger.core.exception.ParseErrorException;
 import com.sourceflag.framework.switchlogger.core.marker.SwitchLoggerCacheMarker;
 import com.sourceflag.framework.switchlogger.core.marker.SwitchLoggerDatabaseMarker;
 import com.sourceflag.framework.switchlogger.core.marker.SwitchLoggerRedisMarker;
+import com.sourceflag.framework.switchlogger.core.processor.IgnoreUrlProcessor;
 import com.sourceflag.framework.switchlogger.core.processor.MappingProcessor;
 import com.sourceflag.framework.switchlogger.core.processor.RecordProcessor;
 import com.sourceflag.framework.switchlogger.core.processor.RequestLoggerProcessor;
 import com.sourceflag.framework.switchlogger.core.processor.mapping.*;
 import com.sourceflag.framework.switchlogger.core.processor.record.*;
-import com.sourceflag.framework.switchlogger.core.wrapper.SwitchLoggerRequestWrapper;
-import com.sourceflag.framework.switchlogger.core.wrapper.SwitchLoggerResponseWrapper;
-import com.sourceflag.framework.switchlogger.utils.JedisUtils;
 import com.sourceflag.framework.switchlogger.utils.SwitchJdbcTemplate;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -30,16 +33,15 @@ import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.annotation.EnableAsync;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
 
 import javax.annotation.Resource;
-import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -64,10 +66,12 @@ public class SwitchLoggerConfig {
 
     @Bean(name = "switchLoggerFilterRegister")
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public FilterRegistrationBean filterRegister(SwitchLoggerProperties properties, List<RecordProcessor> recordProcessors, @Nullable RequestLoggerProcessor requestLoggerProcessor) {
+    public FilterRegistrationBean filterRegister(SwitchLoggerProperties properties, List<RecordProcessor> recordProcessors,
+                                                 @Nullable RequestLoggerProcessor requestLoggerProcessor,
+                                                 @Nullable IgnoreUrlProcessor ignoreUrlProcessor) {
         FilterRegistrationBean frBean = new FilterRegistrationBean();
         frBean.setName(properties.getFilter().getName());
-        frBean.setFilter(new SwitchLoggerFilter(properties, recordProcessors, requestLoggerProcessor));
+        frBean.setFilter(new SwitchLoggerFilter(properties, recordProcessors, requestLoggerProcessor, ignoreUrlProcessor));
         frBean.setOrder(properties.getFilter().getOrder());
         frBean.addUrlPatterns(properties.getFilter().getUrlPatterns());
         return frBean;
@@ -75,34 +79,31 @@ public class SwitchLoggerConfig {
 
     @Bean
     @Conditional(SwitchLoggerRedisMarker.class)
-    @Qualifier("switchLoggerJedisPool")
-    public JedisPool switchLoggerJedisPool() {
-        String password = environment.getProperty("spring.redis.password");
-        String host = environment.getProperty("spring.redis.host", "localhost");
-        int port = Integer.parseInt(environment.getProperty("spring.redis.port", "6379"));
-        int timeout = Integer.parseInt(environment.getProperty("spring.redis.timeout", "5000"));
-        int maxIdle = Integer.parseInt(environment.getProperty("spring.redis.jedis.pool.max-idle", "20"));
-        int minIdle = Integer.parseInt(environment.getProperty("spring.redis.jedis.pool.min-idle", "10"));
-        int maxTotal = Integer.parseInt(environment.getProperty("spring.redis.jedis.pool.max-active", "100"));
-        long maxWait = Long.parseLong(environment.getProperty("spring.redis.jedis.pool.max-wait", "5000"));
-        JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
-        jedisPoolConfig.setMaxIdle(maxIdle);
-        jedisPoolConfig.setMinIdle(minIdle);
-        jedisPoolConfig.setMaxTotal(maxTotal);
-        jedisPoolConfig.setMaxWaitMillis(maxWait);
-        jedisPoolConfig.setTestOnBorrow(false);
-        jedisPoolConfig.setTestOnReturn(false);
-        jedisPoolConfig.setTestOnCreate(false);
-        return password == null || password.trim().equals("") ?
-                new JedisPool(jedisPoolConfig, host, port, timeout) :
-                new JedisPool(jedisPoolConfig, host, port, timeout, password);
-    }
+    @Qualifier("switchLoggerRedisTemplate")
+    public RedisTemplate<String, Object> redisTemplate(@Nullable LettuceConnectionFactory lettuceConnectionFactory, SwitchLoggerProperties properties) {
+        RedisTemplate<String, Object> template = new RedisTemplate<>();
+        if (lettuceConnectionFactory != null) {
+            lettuceConnectionFactory.setDatabase(properties.getRedis().getDatabase());
+            template.setConnectionFactory(lettuceConnectionFactory);
+        }
 
-    @Bean
-    @Conditional(SwitchLoggerRedisMarker.class)
-    @Qualifier("switchLoggerJedisUtils")
-    public JedisUtils switchLoggerJedisUtils(@Qualifier("switchLoggerJedisPool") JedisPool switchLoggerJedisPool) {
-        return new JedisUtils(switchLoggerJedisPool);
+        StringRedisSerializer keySerializer = new StringRedisSerializer();
+        template.setKeySerializer(keySerializer);
+        template.setHashKeySerializer(keySerializer);
+
+        Jackson2JsonRedisSerializer<Object> jacksonSerializer = new Jackson2JsonRedisSerializer<>(Object.class);
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+        objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
+        jacksonSerializer.setObjectMapper(objectMapper);
+
+        template.setValueSerializer(jacksonSerializer);
+        template.setHashValueSerializer(jacksonSerializer);
+        template.setDefaultSerializer(jacksonSerializer);
+        template.afterPropertiesSet();
+        return template;
     }
 
     @Bean
@@ -114,7 +115,7 @@ public class SwitchLoggerConfig {
         dataSource.setPassword((String) checkAndGetEnvironmentVariable(properties.getDatabase().getPassword()));
         dataSource.setDriverClassName((String) checkAndGetEnvironmentVariable(properties.getDatabase().getDriverClassName()));
         dataSource.setUrl((String) checkAndGetEnvironmentVariable(properties.getDatabase().getUrl()));
-        dataSource.setMaxActive(Runtime.getRuntime().availableProcessors() * 2 + 1); // CUP * 2 + 1
+        dataSource.setMaxActive(Runtime.getRuntime().availableProcessors() * 2 + 1);
         dataSource.setMinIdle(1);
         dataSource.setInitialSize(2);
         dataSource.setMaxWait(10000);
@@ -176,8 +177,8 @@ public class SwitchLoggerConfig {
 
     @Bean
     @Conditional(SwitchLoggerRedisMarker.class)
-    public RecordProcessor redisRecordProcessor(@Qualifier("switchLoggerJedisUtils") JedisUtils jedisUtils, SwitchLoggerProperties properties) {
-        return new RedisRecordProcessor(jedisUtils, properties);
+    public RecordProcessor redisRecordProcessor(@Qualifier("switchLoggerRedisTemplate") RedisTemplate<String, Object> redisTemplate, SwitchLoggerProperties properties) {
+        return new RedisRecordProcessor(redisTemplate, properties);
     }
 
     @Bean
@@ -219,9 +220,9 @@ public class SwitchLoggerConfig {
             String original = matcher.group(0);
             String property = matcher.group(1);
             String[] arr = property.split(":");
-            if (arr.length > 2)
+            if (arr.length > 2) {
                 throw new ParseErrorException(var + " is not the correct expression");
-
+            }
             String value = environment.getProperty(arr[0]);
             if (arr.length == 1) {
                 var = var.replace(original, value != null ? value : "");

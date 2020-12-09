@@ -45,13 +45,20 @@ public class SwitchLoggerRequestWrapper extends HttpServletRequestWrapper {
         body = temp;
     }
 
-    public Object getBody() {
+    public String getOriginBody() {
         if (this.body != null) {
-            String content = new String(this.body, StandardCharsets.UTF_8);
+            return new String(this.body, StandardCharsets.UTF_8);
+        }
+        return null;
+    }
+
+    public Object getBody() {
+        String originBody = getOriginBody();
+        if (originBody != null) {
             try {
-                return JsonUtils.mapper.readValue(content, Map.class);
+                return JsonUtils.mapper.readValue(originBody, Map.class);
             } catch (JsonProcessingException e) {
-                return content;
+                return originBody;
             }
         }
         return null;
