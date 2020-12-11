@@ -1,4 +1,4 @@
-package com.sourceflag.framework.switchlogger.starter;
+package com.sourceflag.framework.switchlogger.configuration.marker;
 
 /**
  * SwitchLoggerMarker

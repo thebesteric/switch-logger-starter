@@ -1,4 +1,4 @@
-package com.sourceflag.framework.switchlogger.starter;
+package com.sourceflag.framework.switchlogger.configuration;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -9,21 +9,26 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.sourceflag.framework.switchlogger.configuration.marker.SwitchLoggerCacheMarker;
+import com.sourceflag.framework.switchlogger.configuration.marker.SwitchLoggerDatabaseMarker;
+import com.sourceflag.framework.switchlogger.configuration.marker.SwitchLoggerMarker;
+import com.sourceflag.framework.switchlogger.configuration.marker.SwitchLoggerRedisMarker;
 import com.sourceflag.framework.switchlogger.controller.SwitchLoggerController;
 import com.sourceflag.framework.switchlogger.core.SwitchLoggerFilter;
 import com.sourceflag.framework.switchlogger.core.SwitchLoggerInitialization;
 import com.sourceflag.framework.switchlogger.core.exception.ParseErrorException;
-import com.sourceflag.framework.switchlogger.core.marker.SwitchLoggerCacheMarker;
-import com.sourceflag.framework.switchlogger.core.marker.SwitchLoggerDatabaseMarker;
-import com.sourceflag.framework.switchlogger.core.marker.SwitchLoggerRedisMarker;
 import com.sourceflag.framework.switchlogger.core.processor.IgnoreUrlProcessor;
 import com.sourceflag.framework.switchlogger.core.processor.MappingProcessor;
 import com.sourceflag.framework.switchlogger.core.processor.RecordProcessor;
 import com.sourceflag.framework.switchlogger.core.processor.RequestLoggerProcessor;
 import com.sourceflag.framework.switchlogger.core.processor.mapping.*;
 import com.sourceflag.framework.switchlogger.core.processor.record.*;
+import com.sourceflag.framework.switchlogger.core.scaner.SwitchLoggerScanner;
+import com.sourceflag.framework.switchlogger.core.scaner.annotated.SwitchLoggerAnnotatedEnhancer;
+import com.sourceflag.framework.switchlogger.core.scaner.controller.SwitchLoggerControllerScanner;
 import com.sourceflag.framework.switchlogger.utils.SwitchJdbcTemplate;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -77,9 +82,18 @@ public class SwitchLoggerConfig {
         return frBean;
     }
 
-    @Bean
+    @Bean(name = "switchLoggerControllerScanner")
+    public SwitchLoggerScanner switchLoggerControllerScanner(List<MappingProcessor> mappingProcessors) {
+        return new SwitchLoggerControllerScanner(mappingProcessors);
+    }
+
+    @Bean(name = "switchLoggerAnnotatedEnhancer")
+    public SwitchLoggerAnnotatedEnhancer switchLoggerAnnotatedEnhancer(ConfigurableListableBeanFactory factory, SwitchLoggerProperties properties, List<RecordProcessor> recordProcessors) {
+        return new SwitchLoggerAnnotatedEnhancer(factory, properties, recordProcessors);
+    }
+
+    @Bean(name = "switchLoggerRedisTemplate")
     @Conditional(SwitchLoggerRedisMarker.class)
-    @Qualifier("switchLoggerRedisTemplate")
     public RedisTemplate<String, Object> redisTemplate(@Nullable LettuceConnectionFactory lettuceConnectionFactory, SwitchLoggerProperties properties) {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         if (lettuceConnectionFactory != null) {
@@ -106,9 +120,8 @@ public class SwitchLoggerConfig {
         return template;
     }
 
-    @Bean
+    @Bean(name = "switchLoggerDatasource")
     @Conditional(SwitchLoggerDatabaseMarker.class)
-    @Qualifier("switchLoggerDatasource")
     public DruidDataSource dataSource(SwitchLoggerProperties properties) throws ParseErrorException {
         DruidDataSource dataSource = new DruidDataSource();
         dataSource.setUsername((String) checkAndGetEnvironmentVariable(properties.getDatabase().getUsername()));
@@ -122,9 +135,8 @@ public class SwitchLoggerConfig {
         return dataSource;
     }
 
-    @Bean
+    @Bean(name = "switchLoggerJdbcTemplate")
     @Conditional(SwitchLoggerDatabaseMarker.class)
-    @Qualifier("switchLoggerJdbcTemplate")
     public SwitchJdbcTemplate switchLoggerJdbcTemplate(@Qualifier("switchLoggerDatasource") DruidDataSource dataSource) {
         return new SwitchJdbcTemplate(dataSource);
     }
@@ -193,8 +205,7 @@ public class SwitchLoggerConfig {
         return new DatabaseRecordProcessor(switchLoggerJdbcTemplate, properties);
     }
 
-    @Bean
-    @Qualifier("switchLoggerCache")
+    @Bean(name = "switchLoggerCache")
     @Conditional(SwitchLoggerCacheMarker.class)
     public Cache<String, Object> switchLoggerCache(SwitchLoggerProperties properties) {
         return Caffeine.newBuilder()

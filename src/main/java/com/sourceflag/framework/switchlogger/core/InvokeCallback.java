@@ -1,5 +1,6 @@
 package com.sourceflag.framework.switchlogger.core;
 
+import com.sourceflag.framework.switchlogger.core.domain.RequestLog;
 import com.sourceflag.framework.switchlogger.core.wrapper.SwitchLoggerRequestWrapper;
 import com.sourceflag.framework.switchlogger.core.wrapper.SwitchLoggerResponseWrapper;
 

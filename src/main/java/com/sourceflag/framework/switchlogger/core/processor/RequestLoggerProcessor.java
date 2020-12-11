@@ -1,6 +1,6 @@
 package com.sourceflag.framework.switchlogger.core.processor;
 
-import com.sourceflag.framework.switchlogger.core.RequestLog;
+import com.sourceflag.framework.switchlogger.core.domain.RequestLog;
 import com.sourceflag.framework.switchlogger.core.wrapper.SwitchLoggerRequestWrapper;
 import com.sourceflag.framework.switchlogger.core.wrapper.SwitchLoggerResponseWrapper;
 
@@ -26,7 +26,7 @@ public interface RequestLoggerProcessor {
      * @param responseWrapper responseWrapper
      * @param mapping         mapping
      * @param duration        duration
-     * @return com.sourceflag.framework.switchlogger.core.RequestLog
+     * @return com.sourceflag.framework.switchlogger.core.domain.RequestLog
      * @author Eric
      * @date 2020/12/9 17:04
      */

@@ -1,5 +1,9 @@
 package com.sourceflag.framework.switchlogger.core.wrapper;
 
+import com.sourceflag.framework.switchlogger.core.domain.RequestLog;
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.servlet.ServletOutputStream;
 import javax.servlet.WriteListener;
 import javax.servlet.http.HttpServletResponse;
@@ -19,6 +23,10 @@ public class SwitchLoggerResponseWrapper extends HttpServletResponseWrapper {
 
     private ByteArrayOutputStream buffer;
     private ServletOutputStream out;
+
+    @Getter
+    @Setter
+    private String type = RequestLog.TYPE_INFO;
 
     public SwitchLoggerResponseWrapper(HttpServletResponse response) {
         super(response);

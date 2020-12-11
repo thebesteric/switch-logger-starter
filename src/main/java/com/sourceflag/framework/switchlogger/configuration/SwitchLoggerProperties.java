@@ -1,4 +1,4 @@
-package com.sourceflag.framework.switchlogger.starter;
+package com.sourceflag.framework.switchlogger.configuration;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -8,12 +8,14 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  *
  * @author Eric Joe
  * @version 1.0
- * @date 2020-09-29 22:35
+ * @date 2020-12-12 00:29
  * @since 1.0
  */
 @Data
-@ConfigurationProperties(prefix = "sourceflag.switch.logger")
+@ConfigurationProperties(prefix = SwitchLoggerProperties.PROPERTIES_PREFIX)
 public class SwitchLoggerProperties {
+
+    public static final String PROPERTIES_PREFIX = "sourceflag.switch-logger";
 
     public enum ModelType {
         LOG, STDOUT, CACHE, REDIS, ES, DATABASE

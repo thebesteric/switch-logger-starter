@@ -2,18 +2,17 @@ package com.sourceflag.framework.switchlogger.utils;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import com.sourceflag.framework.switchlogger.annotation.Column;
-import com.sourceflag.framework.switchlogger.core.RequestLog;
+import com.sourceflag.framework.switchlogger.annotation.Table;
+import com.sourceflag.framework.switchlogger.core.domain.RequestLog;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.lang.reflect.Field;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * JdbcUtils
@@ -26,6 +25,8 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 public class SwitchJdbcTemplate {
+
+    public static final String TABLE_SEPARATOR = "_";
 
     @Qualifier("switchLoggerDatasource")
     @Getter
@@ -51,6 +52,44 @@ public class SwitchJdbcTemplate {
 
     public int update(PreparedStatementCreator preparedStatementCreator) throws SQLException {
         return preparedStatementCreator.createPreparedStatement(dataSource.getConnection()).executeUpdate();
+    }
+
+    public void createTable(String tableNamePrefix, Class<?> clazz) throws SQLException, NoSuchFieldException {
+        DatabaseMetaData metaData = Objects.requireNonNull(this.getDataSource()).getConnection().getMetaData();
+
+        String tableName = tableNamePrefix;
+        if (clazz.isAnnotationPresent(Table.class)) {
+            Table table = clazz.getDeclaredAnnotation(Table.class);
+            String name = table.name();
+            if (!"".equals(name)) {
+                tableName += TABLE_SEPARATOR + name;
+            } else {
+                tableName += TABLE_SEPARATOR + ObjectUtils.humpToUnderline(clazz.getSimpleName());
+            }
+        } else {
+            tableName += TABLE_SEPARATOR + ObjectUtils.humpToUnderline(clazz.getSimpleName());
+        }
+
+        ResultSet resultSet = metaData.getTables(null, null, tableName, new String[]{"TABLE"});
+        if (!resultSet.next()) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("CREATE TABLE `").append(tableName).append("` (");
+            sb.append(" `id` int(11) NOT NULL AUTO_INCREMENT,");
+            List<Field> fields = ReflectUtils.getFields(clazz);
+            for (Field field : fields) {
+                Column column = field.getAnnotation(Column.class);
+                sb.append("`").append(column != null && !column.name().isEmpty() ? column.name() : ObjectUtils.humpToUnderline(field.getName()))
+                        .append("` ").append(column != null ? column.type() : "varchar");
+                if (column != null && !"json".equalsIgnoreCase(column.type())) {
+                    sb.append("(").append(column.length()).append(")");
+                }
+                sb.append(", ");
+            }
+            sb.append(" PRIMARY KEY (`id`)");
+            sb.append(") ENGINE=InnoDB DEFAULT CHARSET=UTF8;");
+            this.update(sb.toString());
+            log.info("CREATED TABLE {} SUCCEED", tableName);
+        }
     }
 
     public PageBean<RequestLog> page(String tableName, int page, int pageSize) throws SQLException {

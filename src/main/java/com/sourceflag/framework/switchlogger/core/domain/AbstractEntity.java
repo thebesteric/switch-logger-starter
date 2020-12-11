@@ -1,4 +1,4 @@
-package com.sourceflag.framework.switchlogger.core;
+package com.sourceflag.framework.switchlogger.core.domain;
 
 import com.sourceflag.framework.switchlogger.utils.JsonUtils;
 import lombok.SneakyThrows;

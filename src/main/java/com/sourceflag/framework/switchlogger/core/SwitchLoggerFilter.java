@@ -1,12 +1,14 @@
 package com.sourceflag.framework.switchlogger.core;
 
+import com.sourceflag.framework.switchlogger.configuration.SwitchLoggerProperties;
+import com.sourceflag.framework.switchlogger.core.domain.InvokeLog;
+import com.sourceflag.framework.switchlogger.core.domain.RequestLog;
 import com.sourceflag.framework.switchlogger.core.processor.IgnoreUrlProcessor;
 import com.sourceflag.framework.switchlogger.core.processor.RecordProcessor;
 import com.sourceflag.framework.switchlogger.core.processor.RequestLoggerProcessor;
 import com.sourceflag.framework.switchlogger.core.wrapper.SwitchLoggerFilterWrapper;
 import com.sourceflag.framework.switchlogger.core.wrapper.SwitchLoggerRequestWrapper;
 import com.sourceflag.framework.switchlogger.core.wrapper.SwitchLoggerResponseWrapper;
-import com.sourceflag.framework.switchlogger.starter.SwitchLoggerProperties;
 import com.sourceflag.framework.switchlogger.utils.DurationWatch;
 import com.sourceflag.framework.switchlogger.utils.JsonUtils;
 import lombok.SneakyThrows;
@@ -18,6 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
@@ -82,6 +85,7 @@ public class SwitchLoggerFilter extends SwitchLoggerFilterWrapper {
             filterChain.doFilter(requestWrapper, responseWrapper);
         } catch (Exception ex) {
             ex.printStackTrace();
+            responseWrapper.setType(RequestLog.TYPE_ERROR);
             responseWrapper.setBuffer(ex.getMessage());
         }
         long duration = DurationWatch.stop();
@@ -106,7 +110,7 @@ public class SwitchLoggerFilter extends SwitchLoggerFilterWrapper {
     private RequestLoggerProcessor generateRequestLoggerProcessor() {
         if (requestLoggerProcessor == null) {
             requestLoggerProcessor = (requestWrapper, responseWrapper, mapping, duration) -> {
-                RequestLog requestLog = new RequestLog(requestWrapper, responseWrapper);
+                RequestLog requestLog = new RequestLog(requestWrapper, responseWrapper, trackIdThreadLocal);
                 try {
                     requestLog.setResult(JsonUtils.mapper.readTree(requestLog.getResult().toString()));
                 } catch (Exception ex) {
@@ -124,13 +128,18 @@ public class SwitchLoggerFilter extends SwitchLoggerFilterWrapper {
 
     private IgnoreUrlProcessor generateIgnoreUrlProcessor(IgnoreUrlProcessor ignoreUrlProcessor) {
         if (ignoreUrlProcessor == null) {
-            ignoreUrlProcessor = (urls) -> {
-                urls.add("/favicon.ico");
-                urls.add("/switch-logger/query");
-            };
+            ignoreUrlProcessor = this::addIgnoreUrls;
+        } else {
+            Set<String> ignoreUrls = ignoreUrlProcessor.get();
+            addIgnoreUrls(ignoreUrls);
+            ignoreUrlProcessor.add(ignoreUrls);
         }
-        ignoreUrlProcessor.add(ignoreUrlProcessor.get());
         return ignoreUrlProcessor;
+    }
+
+    private void addIgnoreUrls(Set<String> ignoreUrls) {
+        ignoreUrls.add("/favicon.ico");
+        ignoreUrls.add("/switch-logger/query");
     }
 
     private boolean checkLegalUri(String targetUri) {
@@ -162,12 +171,12 @@ public class SwitchLoggerFilter extends SwitchLoggerFilterWrapper {
         return passed;
     }
 
-    public void doProcessor(RecordProcessor recordProcessor, RequestLog requestLog) {
+    public void doProcessor(RecordProcessor recordProcessor, InvokeLog invokeLog) {
         CompletableFuture.runAsync(() -> {
             try {
-                recordProcessor.processor(requestLog);
-            } catch (Exception e) {
-                e.printStackTrace();
+                recordProcessor.processor(invokeLog);
+            } catch (Throwable throwable) {
+                throwable.printStackTrace();
             }
         });
     }

@@ -1,9 +1,9 @@
 package com.sourceflag.framework.switchlogger.core.processor.record;
 
 import com.github.benmanes.caffeine.cache.Cache;
-import com.sourceflag.framework.switchlogger.core.RequestLog;
+import com.sourceflag.framework.switchlogger.configuration.SwitchLoggerProperties;
+import com.sourceflag.framework.switchlogger.core.domain.InvokeLog;
 import com.sourceflag.framework.switchlogger.core.processor.RecordProcessor;
-import com.sourceflag.framework.switchlogger.starter.SwitchLoggerProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -29,7 +29,7 @@ public class CacheRecordProcessor implements RecordProcessor {
     }
 
     @Override
-    public void processor(RequestLog requestLog) throws Exception {
-        cache.put(requestLog.getTrackId(), requestLog);
+    public void processor(InvokeLog invokeLog) throws Throwable {
+        cache.put(invokeLog.getTrackId(), invokeLog);
     }
 }

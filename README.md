@@ -2,7 +2,7 @@
 
 > 基于 Spring Boot 的一款全局控制层日志记录插件
 
-### 使用
+### Quick start
 在启动类注解上标记 `@EnableSwitchLogger` 即可
 ```java
 @EnableSwitchLogger
@@ -100,3 +100,6 @@ public class SwitchLoggerConfiguration {
 
 }
 ``` 
+
+### @SwitchLogger 使用
+@SwitchLogger 可作用于类或方法上，用于记录非 @Controller 层的方法执行过程

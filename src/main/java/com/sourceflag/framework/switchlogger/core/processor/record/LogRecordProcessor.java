@@ -1,9 +1,9 @@
 package com.sourceflag.framework.switchlogger.core.processor.record;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.sourceflag.framework.switchlogger.core.RequestLog;
+import com.sourceflag.framework.switchlogger.configuration.SwitchLoggerProperties;
+import com.sourceflag.framework.switchlogger.core.domain.InvokeLog;
 import com.sourceflag.framework.switchlogger.core.processor.RecordProcessor;
-import com.sourceflag.framework.switchlogger.starter.SwitchLoggerProperties;
 import com.sourceflag.framework.switchlogger.utils.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,7 +24,7 @@ public class LogRecordProcessor implements RecordProcessor {
     }
 
     @Override
-    public void processor(RequestLog requestLog) throws JsonProcessingException {
-        log.info(JsonUtils.mapper.writeValueAsString(requestLog));
+    public void processor(InvokeLog invokeLog) throws JsonProcessingException {
+        log.info(JsonUtils.mapper.writeValueAsString(invokeLog));
     }
 }

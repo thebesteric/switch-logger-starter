@@ -1,7 +1,7 @@
 package com.sourceflag.framework.switchlogger.controller;
 
 import com.github.benmanes.caffeine.cache.Cache;
-import com.sourceflag.framework.switchlogger.starter.SwitchLoggerProperties;
+import com.sourceflag.framework.switchlogger.configuration.SwitchLoggerProperties;
 import com.sourceflag.framework.switchlogger.utils.SwitchJdbcTemplate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationContext;

@@ -1,14 +1,13 @@
-package com.sourceflag.framework.switchlogger.core;
+package com.sourceflag.framework.switchlogger.core.domain;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sourceflag.framework.switchlogger.annotation.Column;
+import com.sourceflag.framework.switchlogger.annotation.Table;
 import com.sourceflag.framework.switchlogger.core.wrapper.SwitchLoggerRequestWrapper;
 import com.sourceflag.framework.switchlogger.core.wrapper.SwitchLoggerResponseWrapper;
 import lombok.*;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -23,15 +22,19 @@ import java.util.*;
 @Getter
 @Setter
 @NoArgsConstructor
-public class RequestLog extends AbstractEntity {
+@Table(name = "request")
+public class RequestLog extends InvokeLog {
 
-    public RequestLog(SwitchLoggerRequestWrapper requestWrapper, SwitchLoggerResponseWrapper responseWrapper) throws IOException {
+    public RequestLog(SwitchLoggerRequestWrapper requestWrapper, SwitchLoggerResponseWrapper responseWrapper, ThreadLocal<String> trackIdThreadLocal) throws IOException {
 
-        // timestamp
-        this.timestamp = System.currentTimeMillis();
+        // type
+        this.type = responseWrapper.getType();
+
+        // createdTime
+        this.createdTime = System.currentTimeMillis();
 
         // trackId
-        this.trackId = UUID.randomUUID().toString().replaceAll("-", "").toUpperCase();
+        this.trackId = trackIdThreadLocal.get();
 
         // params
         Enumeration<String> parameterNames = requestWrapper.getParameterNames();
@@ -49,6 +52,7 @@ public class RequestLog extends AbstractEntity {
             this.getHeaders().put(headerName, headerValue);
             if ("track_id".equalsIgnoreCase(headerName) || "track-id".equalsIgnoreCase(headerName)) {
                 this.trackId = headerValue;
+                trackIdThreadLocal.set(this.trackId);
             }
         }
 
@@ -100,11 +104,6 @@ public class RequestLog extends AbstractEntity {
         this.uri = requestWrapper.getRequestURI();
     }
 
-
-    @JsonProperty("track_id")
-    @Column(length = 64)
-    private String trackId;
-
     @JsonProperty("request_session_id")
     @Column(length = 64)
     private String requestSessionId;
@@ -137,9 +136,6 @@ public class RequestLog extends AbstractEntity {
     @Column(length = 2048)
     private String queryString;
 
-    @Column(length = 20, type = "bigint")
-    private long timestamp;
-
     @Column(type = "json")
     private Set<Cookie> cookies = new HashSet<>();
 
@@ -155,60 +151,6 @@ public class RequestLog extends AbstractEntity {
     @JsonProperty("origin_body")
     @Column(length = 2048)
     private String originBody;
-
-    @Column(type = "json")
-    private Object result;
-
-    @JsonProperty("execute_info")
-    @Column(type = "json")
-    private ExecuteInfo executeInfo;
-
-    private Object extra;
-
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    public static class ExecuteInfo extends AbstractEntity {
-
-        public ExecuteInfo(Method method, long startTime, long duration) {
-            this.className = method.getDeclaringClass().getName();
-            this.methodInfo = new MethodInfo(method);
-            this.startTime = startTime;
-            this.duration = duration;
-        }
-
-        private String className;
-
-        private MethodInfo methodInfo;
-
-        @JsonProperty("start_time")
-        private long startTime;
-
-        private long duration;
-
-        @Getter
-        @Setter
-        @NoArgsConstructor
-        public static class MethodInfo extends AbstractEntity {
-
-            private String methodName;
-            private LinkedHashMap<String, Object> signatures = new LinkedHashMap<>();
-            private String returnType;
-
-            public MethodInfo(Method method) {
-                this.methodName = method.getName();
-                Parameter[] params = method.getParameters();
-                if (params != null && params.length > 0) {
-                    for (Parameter param : params) {
-                        signatures.put(param.getName(), param.getParameterizedType().getTypeName());
-                    }
-                }
-                this.returnType = method.getReturnType().getName();
-            }
-
-        }
-
-    }
 
     @Data
     @EqualsAndHashCode(callSuper = true)

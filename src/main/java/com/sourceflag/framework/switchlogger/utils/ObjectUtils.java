@@ -1,6 +1,5 @@
 package com.sourceflag.framework.switchlogger.utils;
 
-import java.lang.reflect.Field;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -16,16 +15,11 @@ public class ObjectUtils {
 
     private static Pattern humpPattern = Pattern.compile("[A-Z]");
 
-    public static String[] getFieldName(Class<?> clazz) {
-        Field[] fields = clazz.getDeclaredFields();
-        String[] fieldNames = new String[fields.length];
-        for (int i = 0; i < fields.length; i++) {
-            fieldNames[i] = fields[i].getName();
-        }
-        return fieldNames;
-    }
-
     public static String humpToUnderline(String str) {
+        if (Character.isUpperCase(str.charAt(0))) {
+            str = toLowerCaseFirst(str);
+        }
+
         Matcher matcher = humpPattern.matcher(str);
         StringBuffer sb = new StringBuffer();
         while (matcher.find()) {
@@ -33,6 +27,20 @@ public class ObjectUtils {
         }
         matcher.appendTail(sb);
         return sb.toString();
+    }
+
+    public static String toLowerCaseFirst(String s) {
+        if (Character.isLowerCase(s.charAt(0)))
+            return s;
+        else
+            return Character.toLowerCase(s.charAt(0)) + s.substring(1);
+    }
+
+    public static String toUpperCaseFirst(String s) {
+        if (Character.isUpperCase(s.charAt(0)))
+            return s;
+        else
+            return Character.toUpperCase(s.charAt(0)) + s.substring(1);
     }
 
 }

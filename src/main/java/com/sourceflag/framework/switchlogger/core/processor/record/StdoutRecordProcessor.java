@@ -1,9 +1,9 @@
 package com.sourceflag.framework.switchlogger.core.processor.record;
 
-import com.sourceflag.framework.switchlogger.core.RequestLog;
+import com.sourceflag.framework.switchlogger.configuration.SwitchLoggerProperties;
+import com.sourceflag.framework.switchlogger.core.domain.InvokeLog;
 import com.sourceflag.framework.switchlogger.core.exception.UnsupportedModelException;
 import com.sourceflag.framework.switchlogger.core.processor.RecordProcessor;
-import com.sourceflag.framework.switchlogger.starter.SwitchLoggerProperties;
 import com.sourceflag.framework.switchlogger.utils.JsonUtils;
 
 /**
@@ -21,7 +21,7 @@ public class StdoutRecordProcessor implements RecordProcessor {
     }
 
     @Override
-    public void processor(RequestLog requestLog) throws Exception {
-        System.out.println(JsonUtils.mapper.writeValueAsString(requestLog));
+    public void processor(InvokeLog invokeLog) throws Throwable {
+        System.out.println(JsonUtils.mapper.writeValueAsString(invokeLog));
     }
 }

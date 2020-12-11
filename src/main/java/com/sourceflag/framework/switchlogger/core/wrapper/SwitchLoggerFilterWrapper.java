@@ -2,9 +2,8 @@ package com.sourceflag.framework.switchlogger.core.wrapper;
 
 import javax.servlet.Filter;
 import java.lang.reflect.Method;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -18,5 +17,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public abstract class SwitchLoggerFilterWrapper implements Filter {
 
     public static final Map<String, Method> URL_MAPPING = new ConcurrentHashMap<>(16);
+
+    public static final ThreadLocal<String> trackIdThreadLocal
+            = ThreadLocal.withInitial(() -> UUID.randomUUID().toString().replaceAll("-", "").toUpperCase());
 
 }

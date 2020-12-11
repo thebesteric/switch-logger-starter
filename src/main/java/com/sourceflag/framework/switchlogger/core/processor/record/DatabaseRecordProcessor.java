@@ -1,12 +1,14 @@
 package com.sourceflag.framework.switchlogger.core.processor.record;
 
 import com.sourceflag.framework.switchlogger.annotation.Column;
-import com.sourceflag.framework.switchlogger.core.RequestLog;
+import com.sourceflag.framework.switchlogger.annotation.Table;
+import com.sourceflag.framework.switchlogger.configuration.SwitchLoggerProperties;
+import com.sourceflag.framework.switchlogger.core.domain.InvokeLog;
 import com.sourceflag.framework.switchlogger.core.exception.UnsupportedModelException;
 import com.sourceflag.framework.switchlogger.core.processor.RecordProcessor;
-import com.sourceflag.framework.switchlogger.starter.SwitchLoggerProperties;
 import com.sourceflag.framework.switchlogger.utils.JsonUtils;
 import com.sourceflag.framework.switchlogger.utils.ObjectUtils;
+import com.sourceflag.framework.switchlogger.utils.ReflectUtils;
 import com.sourceflag.framework.switchlogger.utils.SwitchJdbcTemplate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +16,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.lang.reflect.Field;
 import java.sql.PreparedStatement;
+import java.util.List;
 
 /**
  * MySQLRecordProcessor
@@ -41,19 +44,19 @@ public class DatabaseRecordProcessor implements RecordProcessor {
     }
 
     @Override
-    public void processor(RequestLog requestLog) throws Exception {
-        String tableName = properties.getDatabase().getTableName();
-        String[] insertProperties = getInsertProperties();
+    public void processor(InvokeLog invokeLog) throws Throwable {
+        String tableName = parseTableName(invokeLog.getClass());
+        String[] insertProperties = getInsertProperties(invokeLog.getClass());
         String sql = "INSERT INTO " + tableName + " (" + insertProperties[0] + ") VALUES (" + insertProperties[1] + ")";
 
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
-            String[] filedNames = ObjectUtils.getFieldName(RequestLog.class);
-            for (int i = 0; i < filedNames.length; i++) {
+            List<Field> fields = ReflectUtils.getFields(invokeLog.getClass());
+            for (int i = 0; i < fields.size(); i++) {
                 try {
-                    Field field = RequestLog.class.getDeclaredField(filedNames[i]);
+                    Field field = fields.get(i);
                     field.setAccessible(true);
-                    Object result = field.get(requestLog);
+                    Object result = field.get(invokeLog);
                     Column column = field.getAnnotation(Column.class);
                     String type = column.type();
                     if ("int".equalsIgnoreCase(type)) {
@@ -73,11 +76,11 @@ public class DatabaseRecordProcessor implements RecordProcessor {
         });
     }
 
-    public String[] getInsertProperties() {
+    public String[] getInsertProperties(Class<?> clazz) {
         String[] arr = new String[2];
         StringBuilder fields = new StringBuilder();
         StringBuilder placeholders = new StringBuilder();
-        String[] filedNames = ObjectUtils.getFieldName(RequestLog.class);
+        List<String> filedNames = ReflectUtils.getFieldName(clazz);
         for (String filedName : filedNames) {
             fields.append(ObjectUtils.humpToUnderline(filedName)).append(",");
             placeholders.append("?").append(",");
@@ -85,5 +88,21 @@ public class DatabaseRecordProcessor implements RecordProcessor {
         arr[0] = fields.toString().substring(0, fields.lastIndexOf(","));
         arr[1] = placeholders.toString().substring(0, placeholders.lastIndexOf(","));
         return arr;
+    }
+
+    private String parseTableName(Class<?> clazz) {
+        String tableName = properties.getDatabase().getTableName();
+        if (clazz.isAnnotationPresent(Table.class)) {
+            Table table = clazz.getDeclaredAnnotation(Table.class);
+            String name = table.name();
+            if (!"".equals(name)) {
+                tableName += SwitchJdbcTemplate.TABLE_SEPARATOR + name;
+            } else {
+                tableName += SwitchJdbcTemplate.TABLE_SEPARATOR + ObjectUtils.humpToUnderline(clazz.getSimpleName());
+            }
+        } else {
+            tableName += SwitchJdbcTemplate.TABLE_SEPARATOR + ObjectUtils.humpToUnderline(clazz.getSimpleName());
+        }
+        return tableName;
     }
 }

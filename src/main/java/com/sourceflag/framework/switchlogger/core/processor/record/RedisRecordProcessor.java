@@ -1,9 +1,9 @@
 package com.sourceflag.framework.switchlogger.core.processor.record;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.sourceflag.framework.switchlogger.core.RequestLog;
+import com.sourceflag.framework.switchlogger.configuration.SwitchLoggerProperties;
+import com.sourceflag.framework.switchlogger.core.domain.InvokeLog;
 import com.sourceflag.framework.switchlogger.core.processor.RecordProcessor;
-import com.sourceflag.framework.switchlogger.starter.SwitchLoggerProperties;
 import com.sourceflag.framework.switchlogger.utils.JsonUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,9 +31,9 @@ public class RedisRecordProcessor implements Runnable, RecordProcessor {
     }
 
     @Override
-    public void processor(RequestLog requestLog) throws JsonProcessingException {
+    public void processor(InvokeLog invokeLog) throws JsonProcessingException {
         // TODO 后期修改为 Redis 发布订阅模式
-        redisTemplate.opsForZSet().add(properties.getRedis().getKey(), JsonUtils.mapper.writeValueAsString(requestLog), requestLog.getTimestamp());
+        redisTemplate.opsForZSet().add(properties.getRedis().getKey(), JsonUtils.mapper.writeValueAsString(invokeLog), invokeLog.getCreatedTime());
     }
 
     @Override
