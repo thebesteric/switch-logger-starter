@@ -118,7 +118,7 @@ public class SwitchLoggerFilter extends SwitchLoggerFilterWrapper {
                 }
                 Method method = mapping.get(requestLog.getUri());
                 if (method != null) {
-                    requestLog.setExecuteInfo(new RequestLog.ExecuteInfo(method, DurationWatch.getStartTime(), duration));
+                    requestLog.setExecuteInfo(new RequestLog.ExecuteInfo(method, null, DurationWatch.getStartTime(), duration));
                 }
                 return requestLog;
             };

@@ -54,7 +54,10 @@ public class SwitchLoggerAnnotatedEnhancer implements BeanPostProcessor {
             // if Class has @SwitchLogger
             if (originClass.isAnnotationPresent(SwitchLogger.class)) {
                 if (checkLegal(originClass)) {
-                    return enhancer(originClass, new SwitchLoggerAnnotatedInterceptor(properties, recordProcessors), beanName);
+                    Object object = enhancer(originClass, new SwitchLoggerAnnotatedInterceptor(properties, recordProcessors), beanName);
+                    if (object != null) {
+                        return object;
+                    }
                 }
             }
 
@@ -62,7 +65,10 @@ public class SwitchLoggerAnnotatedEnhancer implements BeanPostProcessor {
             for (Method declaredMethod : beanClass.getDeclaredMethods()) {
                 if (declaredMethod.isAnnotationPresent(SwitchLogger.class)) {
                     if (checkLegal(declaredMethod)) {
-                        return enhancer(originClass, new SwitchLoggerAnnotatedInterceptor(properties, recordProcessors), beanName);
+                        Object object = enhancer(originClass, new SwitchLoggerAnnotatedInterceptor(properties, recordProcessors), beanName);
+                        if (object != null) {
+                            return object;
+                        }
                     }
                 }
             }

@@ -57,7 +57,7 @@ public class SwitchLoggerAnnotatedInterceptor implements MethodInterceptor {
                 invokeLog.setResult(finalResult);
                 invokeLog.setTrackId(trackId);
                 invokeLog.setException(finalException);
-                invokeLog.setExecuteInfo(new InvokeLog.ExecuteInfo(method, startTime, finalDurationTime));
+                invokeLog.setExecuteInfo(new InvokeLog.ExecuteInfo(method, args, startTime, finalDurationTime));
                 if (finalException != null) {
                     invokeLog.setType(InvokeLog.TYPE_ERROR);
                 }

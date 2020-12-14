@@ -9,7 +9,9 @@ import lombok.Setter;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 /**
  * InvokeLog
@@ -61,9 +63,9 @@ public class InvokeLog extends AbstractEntity {
     @NoArgsConstructor
     public static class ExecuteInfo extends AbstractEntity {
 
-        public ExecuteInfo(Method method, long startTime, long duration) {
+        public ExecuteInfo(Method method, Object[] args, long startTime, long duration) {
             this.className = method.getDeclaringClass().getName();
-            this.methodInfo = new MethodInfo(method);
+            this.methodInfo = new MethodInfo(method, args);
             this.startTime = startTime;
             this.duration = duration;
         }
@@ -84,14 +86,19 @@ public class InvokeLog extends AbstractEntity {
 
             private String methodName;
             private LinkedHashMap<String, Object> signatures = new LinkedHashMap<>();
+            private LinkedHashMap<String, Object> arguments = new LinkedHashMap<>();
             private String returnType;
 
-            public MethodInfo(Method method) {
+            public MethodInfo(Method method, Object[] args) {
                 this.methodName = method.getName();
                 Parameter[] params = method.getParameters();
                 if (params != null && params.length > 0) {
-                    for (Parameter param : params) {
+                    for (int i = 0; i < params.length; i++) {
+                        Parameter param = params[i];
                         signatures.put(param.getName(), param.getParameterizedType().getTypeName());
+                        if (args != null) {
+                            arguments.put(param.getName(), args[i]);
+                        }
                     }
                 }
                 this.returnType = method.getReturnType().getName();
