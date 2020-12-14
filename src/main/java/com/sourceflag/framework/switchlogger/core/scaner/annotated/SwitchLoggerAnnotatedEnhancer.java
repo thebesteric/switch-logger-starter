@@ -6,13 +6,16 @@ import com.sourceflag.framework.switchlogger.core.processor.RecordProcessor;
 import com.sourceflag.framework.switchlogger.utils.ReflectUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.cglib.proxy.Callback;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.lang.NonNull;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.List;
 
 /**
@@ -73,8 +76,40 @@ public class SwitchLoggerAnnotatedEnhancer implements BeanPostProcessor {
     private Object enhancer(Class<?> originClass, Callback callback, String beanName) {
         enhancer.setSuperclass(originClass);
         enhancer.setCallback(callback);
-        Object object = enhancer.create();
-        beanFactory.registerSingleton(beanName, object);
+
+        Object object = null;
+        for (Constructor<?> constructor : originClass.getDeclaredConstructors()) {
+            Parameter[] parameters = constructor.getParameters();
+            if (parameters.length == 0) {
+                object = enhancer.create();
+            }
+        }
+
+        if (object == null) {
+            for (Constructor<?> constructor : originClass.getDeclaredConstructors()) {
+                Parameter[] parameters = constructor.getParameters();
+                if (parameters.length != 0) {
+                    Class<?>[] argumentTypes = new Class<?>[parameters.length];
+                    Object[] arguments = new Object[parameters.length];
+                    for (int i = 0; i < parameters.length; i++) {
+                        Class<?> clazz = parameters[0].getType();
+                        try {
+                            arguments[i] = beanFactory.getBean(clazz);
+                        } catch (NoSuchBeanDefinitionException ex) {
+                            break;
+                        }
+                        argumentTypes[i] = clazz;
+                    }
+                    object = enhancer.create(argumentTypes, arguments);
+                    break;
+                }
+            }
+        }
+
+        if (object != null) {
+            beanFactory.registerSingleton(beanName, object);
+        }
+
         return object;
     }
 
