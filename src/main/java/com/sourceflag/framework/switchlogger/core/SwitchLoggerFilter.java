@@ -6,11 +6,11 @@ import com.sourceflag.framework.switchlogger.core.domain.RequestLog;
 import com.sourceflag.framework.switchlogger.core.processor.IgnoreUrlProcessor;
 import com.sourceflag.framework.switchlogger.core.processor.RecordProcessor;
 import com.sourceflag.framework.switchlogger.core.processor.RequestLoggerProcessor;
+import com.sourceflag.framework.switchlogger.core.processor.logger.DefaultRequestLoggerProcessor;
 import com.sourceflag.framework.switchlogger.core.wrapper.SwitchLoggerFilterWrapper;
 import com.sourceflag.framework.switchlogger.core.wrapper.SwitchLoggerRequestWrapper;
 import com.sourceflag.framework.switchlogger.core.wrapper.SwitchLoggerResponseWrapper;
 import com.sourceflag.framework.switchlogger.utils.DurationWatch;
-import com.sourceflag.framework.switchlogger.utils.JsonUtils;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,7 +18,6 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -91,7 +90,7 @@ public class SwitchLoggerFilter extends SwitchLoggerFilterWrapper {
         long duration = DurationWatch.stop();
 
         // record request info
-        RequestLog requestLog = generateRequestLoggerProcessor().processor(requestWrapper, responseWrapper, URL_MAPPING, duration);
+        RequestLog requestLog = generateRequestLoggerProcessor().processor(requestWrapper, responseWrapper, URL_MAPPING, trackIdThreadLocal, duration);
 
         // recorder request log
         for (RecordProcessor recordProcessor : recordProcessors) {
@@ -109,19 +108,7 @@ public class SwitchLoggerFilter extends SwitchLoggerFilterWrapper {
 
     private RequestLoggerProcessor generateRequestLoggerProcessor() {
         if (requestLoggerProcessor == null) {
-            requestLoggerProcessor = (requestWrapper, responseWrapper, mapping, duration) -> {
-                RequestLog requestLog = new RequestLog(requestWrapper, responseWrapper, trackIdThreadLocal);
-                try {
-                    requestLog.setResult(JsonUtils.mapper.readTree(requestLog.getResult().toString()));
-                } catch (Exception ex) {
-                    log.debug("cannot parse {} to json", requestLog.getResult());
-                }
-                Method method = mapping.get(requestLog.getUri());
-                if (method != null) {
-                    requestLog.setExecuteInfo(new RequestLog.ExecuteInfo(method, null, DurationWatch.getStartTime(), duration));
-                }
-                return requestLog;
-            };
+            requestLoggerProcessor = new DefaultRequestLoggerProcessor();
         }
         return requestLoggerProcessor;
     }

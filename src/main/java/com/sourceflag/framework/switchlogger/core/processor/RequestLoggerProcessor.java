@@ -22,13 +22,14 @@ public interface RequestLoggerProcessor {
     /**
      * RequestLoggerProcessor
      *
-     * @param requestWrapper  requestWrapper
-     * @param responseWrapper responseWrapper
-     * @param mapping         mapping
-     * @param duration        duration
+     * @param requestWrapper     requestWrapper
+     * @param responseWrapper    responseWrapper
+     * @param mapping            mapping
+     * @param trackIdThreadLocal trackIdThreadLocal
+     * @param duration           duration
      * @return com.sourceflag.framework.switchlogger.core.domain.RequestLog
      * @author Eric
      * @date 2020/12/9 17:04
      */
-    RequestLog processor(SwitchLoggerRequestWrapper requestWrapper, SwitchLoggerResponseWrapper responseWrapper, Map<String, Method> mapping, long duration) throws IOException;
+    RequestLog processor(SwitchLoggerRequestWrapper requestWrapper, SwitchLoggerResponseWrapper responseWrapper, Map<String, Method> mapping, ThreadLocal<String> trackIdThreadLocal, long duration) throws IOException;
 }

@@ -58,15 +58,17 @@ public class DatabaseRecordProcessor implements RecordProcessor {
                     field.setAccessible(true);
                     Object result = field.get(invokeLog);
                     Column column = field.getAnnotation(Column.class);
-                    String type = column.type();
-                    if ("int".equalsIgnoreCase(type)) {
-                        ps.setInt(i + 1, result != null ? Integer.parseInt(result.toString()) : null);
-                    } else if ("bigint".equalsIgnoreCase(type)) {
-                        ps.setLong(i + 1, result != null ? Long.parseLong(result.toString()) : null);
-                    } else if ("json".equalsIgnoreCase(type)) {
-                        ps.setString(i + 1, result != null ? JsonUtils.mapper.writeValueAsString(result) : null);
-                    } else {
-                        ps.setString(i + 1, result != null ? result.toString() : null);
+                    if (column != null) {
+                        String type = column.type();
+                        if ("int".equalsIgnoreCase(type)) {
+                            ps.setInt(i + 1, result != null ? Integer.parseInt(result.toString()) : null);
+                        } else if ("bigint".equalsIgnoreCase(type)) {
+                            ps.setLong(i + 1, result != null ? Long.parseLong(result.toString()) : null);
+                        } else if ("json".equalsIgnoreCase(type)) {
+                            ps.setString(i + 1, result != null ? JsonUtils.mapper.writeValueAsString(result) : null);
+                        } else {
+                            ps.setString(i + 1, result != null ? result.toString() : null);
+                        }
                     }
                 } catch (Exception ex) {
                     ex.printStackTrace();
