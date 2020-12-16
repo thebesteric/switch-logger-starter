@@ -131,7 +131,7 @@ public class SwitchLoggerConfiguration {
 
 }
 ```
-- RequestLoggerProcessor 接口: 可自定义日志处理规则
+- RequestLoggerProcessor 接口: 可自定义日志处理规则（暂不支持数据库模式）
 ```java
 @EnableSwitchLogger
 @Configuration

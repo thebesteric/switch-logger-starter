@@ -4,8 +4,6 @@ import com.sourceflag.framework.switchlogger.core.domain.RequestLog;
 import com.sourceflag.framework.switchlogger.core.processor.RequestLoggerProcessor;
 import com.sourceflag.framework.switchlogger.core.wrapper.SwitchLoggerRequestWrapper;
 import com.sourceflag.framework.switchlogger.core.wrapper.SwitchLoggerResponseWrapper;
-import com.sourceflag.framework.switchlogger.utils.DurationWatch;
-import com.sourceflag.framework.switchlogger.utils.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -26,10 +24,9 @@ public abstract class AbstractRequestLoggerProcessor implements RequestLoggerPro
     @Override
     public RequestLog processor(SwitchLoggerRequestWrapper requestWrapper, SwitchLoggerResponseWrapper responseWrapper, Map<String, Method> mapping, ThreadLocal<String> trackIdThreadLocal, long duration) throws IOException {
         RequestLog requestLog = new DefaultRequestLoggerProcessor().processor(requestWrapper, responseWrapper, mapping, trackIdThreadLocal, duration);
-        doAfterProcessor(requestLog);
-        return requestLog;
+        return doAfterProcessor(requestLog);
     }
 
-    public abstract void doAfterProcessor(RequestLog requestLog);
+    public abstract RequestLog doAfterProcessor(RequestLog requestLog);
 
 }

@@ -54,7 +54,7 @@ public class SwitchJdbcTemplate {
         return preparedStatementCreator.createPreparedStatement(dataSource.getConnection()).executeUpdate();
     }
 
-    public void createTable(String tableNamePrefix, Class<?> clazz) throws SQLException, NoSuchFieldException {
+    public void createTable(String tableNamePrefix, Class<?> clazz) throws SQLException {
         DatabaseMetaData metaData = Objects.requireNonNull(this.getDataSource()).getConnection().getMetaData();
 
         String tableName = tableNamePrefix;

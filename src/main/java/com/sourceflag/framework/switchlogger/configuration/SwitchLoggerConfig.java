@@ -201,8 +201,9 @@ public class SwitchLoggerConfig {
 
     @Bean
     @Conditional(SwitchLoggerDatabaseMarker.class)
-    public RecordProcessor databaseRecordProcessor(@Qualifier("switchLoggerJdbcTemplate") SwitchJdbcTemplate switchLoggerJdbcTemplate, SwitchLoggerProperties properties) {
-        return new DatabaseRecordProcessor(switchLoggerJdbcTemplate, properties);
+    public RecordProcessor databaseRecordProcessor(@Qualifier("switchLoggerJdbcTemplate") SwitchJdbcTemplate switchLoggerJdbcTemplate, SwitchLoggerProperties properties,
+                                                   @Nullable RequestLoggerProcessor requestLoggerProcessor) {
+        return new DatabaseRecordProcessor(switchLoggerJdbcTemplate, properties, requestLoggerProcessor);
     }
 
     @Bean(name = "switchLoggerCache")

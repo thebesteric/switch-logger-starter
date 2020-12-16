@@ -6,6 +6,7 @@ import com.sourceflag.framework.switchlogger.configuration.SwitchLoggerPropertie
 import com.sourceflag.framework.switchlogger.core.domain.InvokeLog;
 import com.sourceflag.framework.switchlogger.core.exception.UnsupportedModelException;
 import com.sourceflag.framework.switchlogger.core.processor.RecordProcessor;
+import com.sourceflag.framework.switchlogger.core.processor.RequestLoggerProcessor;
 import com.sourceflag.framework.switchlogger.utils.JsonUtils;
 import com.sourceflag.framework.switchlogger.utils.ObjectUtils;
 import com.sourceflag.framework.switchlogger.utils.ReflectUtils;
@@ -35,10 +36,14 @@ public class DatabaseRecordProcessor implements RecordProcessor {
 
     private final SwitchLoggerProperties properties;
 
+    private final RequestLoggerProcessor requestLoggerProcessor;
+
     @Override
     public boolean supports(String model) throws UnsupportedModelException {
         if (jdbcTemplate == null) {
             throw new UnsupportedModelException("MySQL Datasource is not configure");
+        } else if (requestLoggerProcessor != null) {
+            throw new UnsupportedModelException("Database model is not support custom log");
         }
         return model != null && !model.trim().equals("") && SwitchLoggerProperties.ModelType.DATABASE.name().equalsIgnoreCase(model);
     }
@@ -58,17 +63,15 @@ public class DatabaseRecordProcessor implements RecordProcessor {
                     field.setAccessible(true);
                     Object result = field.get(invokeLog);
                     Column column = field.getAnnotation(Column.class);
-                    if (column != null) {
-                        String type = column.type();
-                        if ("int".equalsIgnoreCase(type)) {
-                            ps.setInt(i + 1, result != null ? Integer.parseInt(result.toString()) : null);
-                        } else if ("bigint".equalsIgnoreCase(type)) {
-                            ps.setLong(i + 1, result != null ? Long.parseLong(result.toString()) : null);
-                        } else if ("json".equalsIgnoreCase(type)) {
-                            ps.setString(i + 1, result != null ? JsonUtils.mapper.writeValueAsString(result) : null);
-                        } else {
-                            ps.setString(i + 1, result != null ? result.toString() : null);
-                        }
+                    String type = column.type();
+                    if ("int".equalsIgnoreCase(type)) {
+                        ps.setInt(i + 1, result != null ? Integer.parseInt(result.toString()) : null);
+                    } else if ("bigint".equalsIgnoreCase(type)) {
+                        ps.setLong(i + 1, result != null ? Long.parseLong(result.toString()) : null);
+                    } else if ("json".equalsIgnoreCase(type)) {
+                        ps.setString(i + 1, result != null ? JsonUtils.mapper.writeValueAsString(result) : null);
+                    } else {
+                        ps.setString(i + 1, result != null ? result.toString() : null);
                     }
                 } catch (Exception ex) {
                     ex.printStackTrace();
