@@ -81,6 +81,7 @@ public class SwitchLoggerFilter extends SwitchLoggerFilterWrapper {
         // record spend time
         DurationWatch.start();
         try {
+            initTrackId(requestWrapper);
             filterChain.doFilter(requestWrapper, responseWrapper);
         } catch (Exception ex) {
             ex.printStackTrace();

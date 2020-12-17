@@ -50,10 +50,6 @@ public class RequestLog extends InvokeLog {
             String headerName = headerNames.nextElement();
             String headerValue = requestWrapper.getHeader(headerName);
             this.getHeaders().put(headerName, headerValue);
-            if ("track_id".equalsIgnoreCase(headerName) || "track-id".equalsIgnoreCase(headerName)) {
-                this.trackId = headerValue;
-                trackIdThreadLocal.set(this.trackId);
-            }
         }
 
         // cookies
