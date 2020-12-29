@@ -23,6 +23,7 @@ public class SwitchLoggerProperties {
 
     private boolean enable = true;
 
+    // support maven and gradle
     private String[] compilePath = {"target\\classes", "build\\classes\\java\\main"};
 
     private String model = ModelType.LOG.name();
