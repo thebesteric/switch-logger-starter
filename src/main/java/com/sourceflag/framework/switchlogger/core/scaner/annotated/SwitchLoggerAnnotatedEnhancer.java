@@ -98,7 +98,7 @@ public class SwitchLoggerAnnotatedEnhancer implements BeanPostProcessor {
                     Class<?>[] argumentTypes = new Class<?>[parameters.length];
                     Object[] arguments = new Object[parameters.length];
                     for (int i = 0; i < parameters.length; i++) {
-                        Class<?> clazz = parameters[0].getType();
+                        Class<?> clazz = parameters[i].getType();
                         try {
                             arguments[i] = beanFactory.getBean(clazz);
                         } catch (NoSuchBeanDefinitionException ex) {
