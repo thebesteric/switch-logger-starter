@@ -2,6 +2,7 @@ package com.sourceflag.framework.switchlogger.core.scaner.annotated;
 
 import com.sourceflag.framework.switchlogger.annotation.SwitchLogger;
 import com.sourceflag.framework.switchlogger.configuration.SwitchLoggerProperties;
+import com.sourceflag.framework.switchlogger.core.processor.AttributeProcessor;
 import com.sourceflag.framework.switchlogger.core.processor.RecordProcessor;
 import com.sourceflag.framework.switchlogger.utils.ReflectUtils;
 import lombok.RequiredArgsConstructor;
@@ -13,9 +14,7 @@ import org.springframework.cglib.proxy.Callback;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.lang.NonNull;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
+import java.lang.reflect.*;
 import java.util.List;
 
 /**
@@ -36,6 +35,7 @@ public class SwitchLoggerAnnotatedEnhancer implements BeanPostProcessor {
     private final ConfigurableListableBeanFactory beanFactory;
     private final SwitchLoggerProperties properties;
     private final List<RecordProcessor> recordProcessors;
+    private final List<AttributeProcessor> attributeProcessors;
 
     @Override
     public Object postProcessAfterInitialization(@NonNull Object bean, String beanName) throws BeansException {
@@ -54,7 +54,7 @@ public class SwitchLoggerAnnotatedEnhancer implements BeanPostProcessor {
             // if Class has @SwitchLogger
             if (originClass.isAnnotationPresent(SwitchLogger.class)) {
                 if (checkLegal(originClass)) {
-                    Object object = enhancer(originClass, new SwitchLoggerAnnotatedInterceptor(properties, recordProcessors), beanName);
+                    Object object = enhancer(originClass, new SwitchLoggerAnnotatedInterceptor(properties, recordProcessors), beanName, bean);
                     if (object != null) {
                         return object;
                     }
@@ -65,7 +65,7 @@ public class SwitchLoggerAnnotatedEnhancer implements BeanPostProcessor {
             for (Method declaredMethod : beanClass.getDeclaredMethods()) {
                 if (declaredMethod.isAnnotationPresent(SwitchLogger.class)) {
                     if (checkLegal(declaredMethod)) {
-                        Object object = enhancer(originClass, new SwitchLoggerAnnotatedInterceptor(properties, recordProcessors), beanName);
+                        Object object = enhancer(originClass, new SwitchLoggerAnnotatedInterceptor(properties, recordProcessors), beanName, bean);
                         if (object != null) {
                             return object;
                         }
@@ -79,7 +79,7 @@ public class SwitchLoggerAnnotatedEnhancer implements BeanPostProcessor {
         return bean;
     }
 
-    private Object enhancer(Class<?> originClass, Callback callback, String beanName) {
+    private Object enhancer(Class<?> originClass, Callback callback, String beanName, Object bean) {
         enhancer.setSuperclass(originClass);
         enhancer.setCallback(callback);
 
@@ -110,6 +110,31 @@ public class SwitchLoggerAnnotatedEnhancer implements BeanPostProcessor {
                     break;
                 }
             }
+        }
+
+        // To deal with the parent class
+        Field[] beanDeclaredFields = bean.getClass().getSuperclass().getDeclaredFields();
+        Class<?> superclass;
+        while ((superclass = originClass.getSuperclass()) != null) {
+            Field[] superclassDeclaredFields = superclass.getDeclaredFields();
+            for (Field superclassDeclaredField : superclassDeclaredFields) {
+                for (Field beanDeclaredField : beanDeclaredFields) {
+                    boolean isFinal = Modifier.isFinal(beanDeclaredField.getModifiers());
+                    boolean isStatic = Modifier.isStatic(beanDeclaredField.getModifiers());
+                    if (superclassDeclaredField.getName().equals(beanDeclaredField.getName()) && !isFinal && !isStatic) {
+                        for (AttributeProcessor attributeProcessor : attributeProcessors) {
+                            if (attributeProcessor.supports(beanDeclaredField)) {
+                                try {
+                                    attributeProcessor.processor(superclassDeclaredField, object);
+                                } catch (Throwable throwable) {
+                                    throwable.printStackTrace();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            originClass = superclass;
         }
 
         if (object != null) {

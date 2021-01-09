@@ -17,10 +17,9 @@ import com.sourceflag.framework.switchlogger.controller.SwitchLoggerController;
 import com.sourceflag.framework.switchlogger.core.SwitchLoggerFilter;
 import com.sourceflag.framework.switchlogger.core.SwitchLoggerInitialization;
 import com.sourceflag.framework.switchlogger.core.exception.ParseErrorException;
-import com.sourceflag.framework.switchlogger.core.processor.IgnoreUrlProcessor;
-import com.sourceflag.framework.switchlogger.core.processor.MappingProcessor;
-import com.sourceflag.framework.switchlogger.core.processor.RecordProcessor;
-import com.sourceflag.framework.switchlogger.core.processor.RequestLoggerProcessor;
+import com.sourceflag.framework.switchlogger.core.processor.*;
+import com.sourceflag.framework.switchlogger.core.processor.attribute.AutowiredAttributeProcessor;
+import com.sourceflag.framework.switchlogger.core.processor.attribute.ValueAttributeProcessor;
 import com.sourceflag.framework.switchlogger.core.processor.mapping.*;
 import com.sourceflag.framework.switchlogger.core.processor.record.*;
 import com.sourceflag.framework.switchlogger.core.scaner.SwitchLoggerScanner;
@@ -88,8 +87,11 @@ public class SwitchLoggerConfig {
     }
 
     @Bean(name = "switchLoggerAnnotatedEnhancer")
-    public SwitchLoggerAnnotatedEnhancer switchLoggerAnnotatedEnhancer(ConfigurableListableBeanFactory factory, SwitchLoggerProperties properties, List<RecordProcessor> recordProcessors) {
-        return new SwitchLoggerAnnotatedEnhancer(factory, properties, recordProcessors);
+    public SwitchLoggerAnnotatedEnhancer switchLoggerAnnotatedEnhancer(ConfigurableListableBeanFactory factory,
+                                                                       SwitchLoggerProperties properties,
+                                                                       List<RecordProcessor> recordProcessors,
+                                                                       List<AttributeProcessor> attributeProcessors) {
+        return new SwitchLoggerAnnotatedEnhancer(factory, properties, recordProcessors, attributeProcessors);
     }
 
     @Bean(name = "switchLoggerRedisTemplate")
@@ -139,6 +141,18 @@ public class SwitchLoggerConfig {
     @Conditional(SwitchLoggerDatabaseMarker.class)
     public SwitchJdbcTemplate switchLoggerJdbcTemplate(@Qualifier("switchLoggerDatasource") DruidDataSource dataSource) {
         return new SwitchJdbcTemplate(dataSource);
+    }
+
+    // AttributeProcessor
+
+    @Bean(name = "switchLoggerAutowiredAttributeProcessor")
+    public AttributeProcessor autowiredAttributeProcessor() {
+        return new AutowiredAttributeProcessor();
+    }
+
+    @Bean(name = "switchLoggerValueAttributeProcessor")
+    public AttributeProcessor valueAttributeProcessor() {
+        return new ValueAttributeProcessor();
     }
 
     // MappingProcessor
