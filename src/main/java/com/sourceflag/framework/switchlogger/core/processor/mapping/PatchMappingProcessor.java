@@ -20,7 +20,7 @@ public class PatchMappingProcessor implements MappingProcessor {
     @Override
     public boolean supports(Method method) {
         this.method = method;
-        return method.getAnnotation(PatchMapping.class) != null;
+        return method.isAnnotationPresent(PatchMapping.class);
     }
 
     @Override

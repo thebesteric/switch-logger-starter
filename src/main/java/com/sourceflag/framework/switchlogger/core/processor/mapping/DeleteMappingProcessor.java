@@ -20,7 +20,7 @@ public class DeleteMappingProcessor implements MappingProcessor {
     @Override
     public boolean supports(Method method) {
         this.method = method;
-        return method.getAnnotation(DeleteMapping.class) != null;
+        return method.isAnnotationPresent(DeleteMapping.class);
     }
 
     @Override

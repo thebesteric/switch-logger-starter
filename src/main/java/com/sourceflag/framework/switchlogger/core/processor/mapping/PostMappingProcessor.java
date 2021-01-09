@@ -20,7 +20,7 @@ public class PostMappingProcessor implements MappingProcessor {
     @Override
     public boolean supports(Method method) {
         this.method = method;
-        return method.getAnnotation(PostMapping.class) != null;
+        return method.isAnnotationPresent(PostMapping.class);
     }
 
     @Override

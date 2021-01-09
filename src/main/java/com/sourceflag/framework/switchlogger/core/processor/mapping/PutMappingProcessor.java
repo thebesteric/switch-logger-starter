@@ -20,7 +20,7 @@ public class PutMappingProcessor implements MappingProcessor {
     @Override
     public boolean supports(Method method) {
         this.method = method;
-        return method.getAnnotation(PutMapping.class) != null;
+        return method.isAnnotationPresent(PutMapping.class);
     }
 
     @Override

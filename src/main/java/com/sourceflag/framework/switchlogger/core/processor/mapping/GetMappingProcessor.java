@@ -20,7 +20,7 @@ public class GetMappingProcessor implements MappingProcessor {
     @Override
     public boolean supports(Method method) {
         this.method = method;
-        return method.getAnnotation(GetMapping.class) != null;
+        return method.isAnnotationPresent(GetMapping.class);
     }
 
     @Override
