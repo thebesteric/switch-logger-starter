@@ -13,7 +13,7 @@ public class Application {
     }
 }
 ```
-添加上 `@EnableSwitchLogger` 后，即可对所有接口按照默认规则进行全局控制层日志记录
+添加上 `@EnableSwitchLogger` 后，即可对所有 Controller 层按照默认规则进行全局控制层日志记录
 
 ### 配置
 ```yaml
@@ -101,7 +101,6 @@ public class RequestMappingProcessor implements MappingProcessor {
 @Slf4j
 @Component
 public class LogRecordProcessor implements RecordProcessor {
-
     @Override
     public boolean supports(String model) {
         return model == null || model.trim().equals("") || SwitchLoggerProperties.ModelType.LOG.name().equalsIgnoreCase(model);
@@ -119,7 +118,6 @@ public class LogRecordProcessor implements RecordProcessor {
 @EnableSwitchLogger
 @Configuration
 public class SwitchLoggerConfiguration {
-
     @Bean
     public IgnoreUrlProcessor ignoreUrlProcessor() {
         return ignoreUrls -> {
@@ -128,15 +126,14 @@ public class SwitchLoggerConfiguration {
             ignoreUrls.add("/v2/api-docs");
         };
     }
-
 }
 ```
+
 - RequestLoggerProcessor 接口: 可自定义日志处理规则（暂不支持数据库模式）
 ```java
 @EnableSwitchLogger
 @Configuration
 public class SwitchLoggerConfiguration {
-
     @Bean
     public RequestLoggerProcessor requestLoggerProcessor() {
         return new RequestLoggerProcessor() {
@@ -148,31 +145,58 @@ public class SwitchLoggerConfiguration {
             }
         };
     }
-
 }
 ``` 
 
+- AttributeProcessor 接口: 自定义注入属性解析器
+```java
+@EnableSwitchLogger
+@Configuration
+public class SwitchLoggerConfiguration {
+    @Bean
+    public AttributeProcessor attributeProcessor(){
+        return new AttributeProcessor() {
+            @Override
+            public boolean supports(Field sourceField) {
+                return false;
+            }
+
+            @Override
+            public void processor(Field targetField, Object bean) throws Throwable {
+                // some logic
+            }
+        };
+    }
+}
+```
+
 ### @SwitchLogger 使用
 @SwitchLogger 可作用于类或方法上，用于记录非 @Controller 层的方法执行过程，同时该注解会记录 trackId，作为 Controller 层的调用链关系
+> 默认含有 @Controller 或 @RestController 层无需添加 @SwitchLogger 注解，框架会自动应用
 ```java
 @Component
 @SwitchLogger(tag = "service", extra = {"hello", "world"})
 public class UserService {
-
-    @SwitchLogger(tag = "service1", extra = {"hello1", "world1"})
-    public List<String> test(List<String> arr) {
+    @SwitchLogger(tag = "foo", extra = {"foo", "bar"})
+    public List<String> foo(List<String> arr) {
         arr.add("test");
         return arr;
     }
 
-    @SwitchLogger(tag = "service2", extra = {"hello2", "world2"})
-    public String test(String arr) {
+    @SwitchLogger(tag = "bar", extra = {"some", "thing"})
+    public String bar(String arr) {
         return "arr";
     }
 
-    public String test() {
+    public String other() {
         return "test";
     }
-
 }
 ```
+
+### Tips
+- 关于 TrackId 的使用
+
+框架默认支持自定义 `track-id`, `x-track-id`, `transaction-id`, `x-transaction-id` 四种 trackId 作为自定义 header
+> `TrackId` 主要用于我们在进行多层链路调用时的唯一标识  
+> 如果我们在 header 中指定了上述的其中一种，则框架默认会使用我们自定义的值，否则框架会自动生成一个 UUID 作为 trackId 的值
