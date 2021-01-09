@@ -28,10 +28,11 @@ public class DefaultRequestLoggerProcessor implements RequestLoggerProcessor {
         try {
             requestLog.setResult(JsonUtils.mapper.readTree(requestLog.getResult().toString()));
         } catch (Exception ex) {
-            log.debug("cannot parse {} to json", requestLog.getResult());
+            log.debug("Cannot parse {} to json", requestLog.getResult());
         }
         Method method = mapping.get(requestLog.getUri());
         if (method != null) {
+            determineSwitchLoggerInfo(method, requestLog);
             requestLog.setExecuteInfo(new RequestLog.ExecuteInfo(method, null, DurationWatch.getStartTime(), duration));
         }
         return requestLog;

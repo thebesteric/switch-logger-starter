@@ -7,11 +7,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
-import java.util.List;
 
 /**
  * InvokeLog
@@ -97,7 +96,11 @@ public class InvokeLog extends AbstractEntity {
                         Parameter param = params[i];
                         signatures.put(param.getName(), param.getParameterizedType().getTypeName());
                         if (args != null) {
-                            arguments.put(param.getName(), args[i]);
+                            if (param.getParameterizedType() == HttpServletRequest.class || param.getParameterizedType() == HttpServletRequest.class) {
+                                arguments.put(param.getName(), param.getParameterizedType().getTypeName());
+                            } else {
+                                arguments.put(param.getName(), args[i]);
+                            }
                         }
                     }
                 }

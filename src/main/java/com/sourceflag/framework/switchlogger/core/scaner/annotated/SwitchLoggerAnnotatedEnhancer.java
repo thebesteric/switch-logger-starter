@@ -13,6 +13,8 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.cglib.proxy.Callback;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.lang.NonNull;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.lang.reflect.*;
 import java.util.List;
@@ -40,6 +42,12 @@ public class SwitchLoggerAnnotatedEnhancer implements BeanPostProcessor {
     @Override
     public Object postProcessAfterInitialization(@NonNull Object bean, String beanName) throws BeansException {
         Class<?> beanClass = bean.getClass();
+
+        // Not proxy Controller layer
+        if (beanClass.isAnnotationPresent(Controller.class) || beanClass.isAnnotationPresent(RestController.class)) {
+            return bean;
+        }
+
         String beanClassName = beanClass.getName();
         String originClassName = beanClassName;
 
