@@ -19,6 +19,7 @@ import com.sourceflag.framework.switchlogger.core.SwitchLoggerInitialization;
 import com.sourceflag.framework.switchlogger.core.exception.ParseErrorException;
 import com.sourceflag.framework.switchlogger.core.processor.*;
 import com.sourceflag.framework.switchlogger.core.processor.attribute.AutowiredAttributeProcessor;
+import com.sourceflag.framework.switchlogger.core.processor.attribute.ResourceAttributeProcessor;
 import com.sourceflag.framework.switchlogger.core.processor.attribute.ValueAttributeProcessor;
 import com.sourceflag.framework.switchlogger.core.processor.mapping.*;
 import com.sourceflag.framework.switchlogger.core.processor.record.*;
@@ -148,6 +149,11 @@ public class SwitchLoggerConfig {
     @Bean(name = "switchLoggerAutowiredAttributeProcessor")
     public AttributeProcessor autowiredAttributeProcessor() {
         return new AutowiredAttributeProcessor();
+    }
+
+    @Bean(name = "switchLoggerResourceAttributeProcessor")
+    public AttributeProcessor resourceAttributeProcessor() {
+        return new ResourceAttributeProcessor();
     }
 
     @Bean(name = "switchLoggerValueAttributeProcessor")
