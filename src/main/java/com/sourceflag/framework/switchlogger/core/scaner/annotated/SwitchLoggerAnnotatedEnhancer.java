@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.lang.reflect.*;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -138,8 +137,8 @@ public class SwitchLoggerAnnotatedEnhancer implements BeanPostProcessor {
         }
 
         if (object != null) {
-            // Begin processing legal properties of the parent class
-            handleParentAttributes(originClass, bean, object);
+            // Begin processing legal properties of the class
+            handleAttributes(originClass, object);
             beanFactory.registerSingleton(beanName, object);
         }
 
@@ -153,34 +152,34 @@ public class SwitchLoggerAnnotatedEnhancer implements BeanPostProcessor {
      * eg. @Autowired or @Value
      *
      * @param originClass originClass
-     * @param originBean  originBean
      * @param proxyObject proxyObject
      * @author Eric
      * @date 2021/1/14 23:40
      */
-    private void handleParentAttributes(Class<?> originClass, Object originBean, Object proxyObject) {
-        Field[] beanDeclaredFields = originBean.getClass().getSuperclass().getDeclaredFields();
-        Class<?> superclass;
-        while ((superclass = originClass.getSuperclass()) != null) {
-            Field[] superclassDeclaredFields = superclass.getDeclaredFields();
-            for (Field superclassDeclaredField : superclassDeclaredFields) {
-                for (Field beanDeclaredField : beanDeclaredFields) {
-                    boolean isFinal = Modifier.isFinal(beanDeclaredField.getModifiers());
-                    boolean isStatic = Modifier.isStatic(beanDeclaredField.getModifiers());
-                    if (superclassDeclaredField.getName().equals(beanDeclaredField.getName()) && !isFinal && !isStatic) {
-                        for (AttributeProcessor attributeProcessor : attributeProcessors) {
-                            if (attributeProcessor.supports(beanDeclaredField)) {
-                                try {
-                                    attributeProcessor.processor(superclassDeclaredField, proxyObject);
-                                } catch (Throwable throwable) {
-                                    throwable.printStackTrace();
-                                }
-                            }
+    private void handleAttributes(Class<?> originClass, Object proxyObject) {
+        Class<?> currentClass = originClass;
+        do {
+            Field[] currentClassDeclaredFields = currentClass.getDeclaredFields();
+            injectAttributes(currentClassDeclaredFields, proxyObject);
+            currentClass = currentClass.getSuperclass();
+        } while (currentClass != null);
+    }
+
+    private void injectAttributes(Field[] declaredFields, Object proxyObject) {
+        for (Field declaredField : declaredFields) {
+            boolean isFinal = Modifier.isFinal(declaredField.getModifiers());
+            boolean isStatic = Modifier.isStatic(declaredField.getModifiers());
+            if (!isFinal && !isStatic) {
+                for (AttributeProcessor attributeProcessor : attributeProcessors) {
+                    if (attributeProcessor.supports(declaredField)) {
+                        try {
+                            attributeProcessor.processor(declaredField, proxyObject);
+                        } catch (Throwable throwable) {
+                            throwable.printStackTrace();
                         }
                     }
                 }
             }
-            originClass = superclass;
         }
     }
 
@@ -211,4 +210,5 @@ public class SwitchLoggerAnnotatedEnhancer implements BeanPostProcessor {
     private boolean checkLegal(Class<?> clazz) {
         return ReflectUtils.isPublic(clazz) && !ReflectUtils.isStatic(clazz) && !ReflectUtils.isFinal(clazz);
     }
+
 }
