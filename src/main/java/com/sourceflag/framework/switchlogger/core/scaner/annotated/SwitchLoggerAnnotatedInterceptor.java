@@ -79,10 +79,12 @@ public class SwitchLoggerAnnotatedInterceptor implements MethodInterceptor {
 
     private SwitchLoggerAnnotationInfo extractSwitchLoggerAnnotationInfo(Method method) {
         SwitchLoggerAnnotationInfo.SwitchLoggerAnnotationInfoBuilder builder = SwitchLoggerAnnotationInfo.builder();
+        // Check if the class contains @SwitchLogger
         if (method.getDeclaringClass().isAnnotationPresent(SwitchLogger.class)) {
             SwitchLogger classAnnotation = method.getDeclaringClass().getDeclaredAnnotation(SwitchLogger.class);
             builder.classAnnotationTag(classAnnotation.tag()).classAnnotationExtra(classAnnotation.extra());
         }
+        // Check if the method contains @SwitchLogger
         if (method.isAnnotationPresent(SwitchLogger.class)) {
             SwitchLogger methodAnnotation = method.getDeclaredAnnotation(SwitchLogger.class);
             builder.methodAnnotationTag(methodAnnotation.tag()).methodAnnotationExtra(methodAnnotation.extra());
@@ -100,10 +102,12 @@ public class SwitchLoggerAnnotatedInterceptor implements MethodInterceptor {
         String classAnnotationTag, methodAnnotationTag;
         String[] classAnnotationExtra, methodAnnotationExtra;
 
+        // Method tag first
         public String getAnnotationTag() {
             return methodAnnotationTag == null ? classAnnotationTag : methodAnnotationTag;
         }
 
+        // Method extra first
         public String[] getAnnotationExtra() {
             return methodAnnotationExtra == null ? classAnnotationExtra : methodAnnotationExtra;
         }

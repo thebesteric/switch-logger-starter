@@ -7,6 +7,8 @@ import java.lang.reflect.Field;
 /**
  * ValueAttributeProcessor
  *
+ * Handle SpEL or Environment attr in the parent class
+ *
  * @author Eric Joe
  * @version 1.0
  * @date 2021-01-09 17:44
@@ -62,13 +64,6 @@ public class ValueAttributeProcessor extends ApplicationAttributeProcessor {
             }
         }
 
-    }
-
-
-    public static void main(String[] args) {
-        String value = "${spring.profiles.active:dev}";
-        value = value.substring(2, value.length() - 1);
-        System.out.println(value);
     }
 
 }

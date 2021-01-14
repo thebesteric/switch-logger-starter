@@ -17,6 +17,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.lang.reflect.*;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -39,19 +41,22 @@ public class SwitchLoggerAnnotatedEnhancer implements BeanPostProcessor {
     private final List<RecordProcessor> recordProcessors;
     private final List<AttributeProcessor> attributeProcessors;
 
+    // Not proxy layer
+    private static final List<Class<?>> notProxyClasses = Arrays.asList(Controller.class, RestController.class);
+
     @Override
     public Object postProcessAfterInitialization(@NonNull Object bean, String beanName) throws BeansException {
         Class<?> beanClass = bean.getClass();
 
-        // Not proxy Controller layer
-        if (beanClass.isAnnotationPresent(Controller.class) || beanClass.isAnnotationPresent(RestController.class)) {
+        // Not proxy layer
+        if (notProxyClasses.contains(beanClass)) {
             return bean;
         }
 
         String beanClassName = beanClass.getName();
         String originClassName = beanClassName;
 
-        // check if used Spring CGLIB, eg: Aspect
+        // Check if used Spring CGLIB. eg: Aspect
         if (beanClassName.contains(SPRING_CGLIB_SEPARATOR)) {
             originClassName = beanClassName.substring(0, beanClassName.indexOf(SPRING_CGLIB_SEPARATOR));
         }
@@ -62,10 +67,7 @@ public class SwitchLoggerAnnotatedEnhancer implements BeanPostProcessor {
             // if Class has @SwitchLogger
             if (originClass.isAnnotationPresent(SwitchLogger.class)) {
                 if (checkLegal(originClass)) {
-                    Object object = enhancer(originClass, new SwitchLoggerAnnotatedInterceptor(properties, recordProcessors), beanName, bean);
-                    if (object != null) {
-                        return object;
-                    }
+                    return enhancer(originClass, new SwitchLoggerAnnotatedInterceptor(properties, recordProcessors), beanName, bean);
                 }
             }
 
@@ -73,10 +75,7 @@ public class SwitchLoggerAnnotatedEnhancer implements BeanPostProcessor {
             for (Method declaredMethod : beanClass.getDeclaredMethods()) {
                 if (declaredMethod.isAnnotationPresent(SwitchLogger.class)) {
                     if (checkLegal(declaredMethod)) {
-                        Object object = enhancer(originClass, new SwitchLoggerAnnotatedInterceptor(properties, recordProcessors), beanName, bean);
-                        if (object != null) {
-                            return object;
-                        }
+                        return enhancer(originClass, new SwitchLoggerAnnotatedInterceptor(properties, recordProcessors), beanName, bean);
                     }
                 }
             }
@@ -87,11 +86,24 @@ public class SwitchLoggerAnnotatedEnhancer implements BeanPostProcessor {
         return bean;
     }
 
+    /**
+     * Enhancer class
+     *
+     * @param originClass originClass
+     * @param callback    callback function
+     * @param beanName    beanName
+     * @param bean        bean
+     * @return java.lang.Object
+     * @author Eric
+     * @date 2021/1/14 23:34
+     */
     private Object enhancer(Class<?> originClass, Callback callback, String beanName, Object bean) {
         enhancer.setSuperclass(originClass);
         enhancer.setCallback(callback);
 
         Object object = null;
+
+        // 1. Deal the no argument constructor
         for (Constructor<?> constructor : originClass.getDeclaredConstructors()) {
             Parameter[] parameters = constructor.getParameters();
             if (parameters.length == 0) {
@@ -99,29 +111,55 @@ public class SwitchLoggerAnnotatedEnhancer implements BeanPostProcessor {
             }
         }
 
+        // 2. Deal the has argument constructor
         if (object == null) {
             for (Constructor<?> constructor : originClass.getDeclaredConstructors()) {
                 Parameter[] parameters = constructor.getParameters();
                 if (parameters.length != 0) {
                     Class<?>[] argumentTypes = new Class<?>[parameters.length];
                     Object[] arguments = new Object[parameters.length];
+                    boolean isCreate = true;
                     for (int i = 0; i < parameters.length; i++) {
                         Class<?> clazz = parameters[i].getType();
                         try {
                             arguments[i] = beanFactory.getBean(clazz);
+                            argumentTypes[i] = clazz;
                         } catch (NoSuchBeanDefinitionException ex) {
+                            isCreate = false;
                             break;
                         }
-                        argumentTypes[i] = clazz;
                     }
-                    object = enhancer.create(argumentTypes, arguments);
-                    break;
+                    if (isCreate) {
+                        object = enhancer.create(argumentTypes, arguments);
+                        break;
+                    }
                 }
             }
         }
 
-        // To deal with the parent class
-        Field[] beanDeclaredFields = bean.getClass().getSuperclass().getDeclaredFields();
+        if (object != null) {
+            // Begin processing legal properties of the parent class
+            handleParentAttributes(originClass, bean, object);
+            beanFactory.registerSingleton(beanName, object);
+        }
+
+        return object == null ? bean : object;
+    }
+
+    /**
+     * handleParentAttributes
+     * <p>
+     * Processing legal properties of the parent class
+     * eg. @Autowired or @Value
+     *
+     * @param originClass originClass
+     * @param originBean  originBean
+     * @param proxyObject proxyObject
+     * @author Eric
+     * @date 2021/1/14 23:40
+     */
+    private void handleParentAttributes(Class<?> originClass, Object originBean, Object proxyObject) {
+        Field[] beanDeclaredFields = originBean.getClass().getSuperclass().getDeclaredFields();
         Class<?> superclass;
         while ((superclass = originClass.getSuperclass()) != null) {
             Field[] superclassDeclaredFields = superclass.getDeclaredFields();
@@ -133,7 +171,7 @@ public class SwitchLoggerAnnotatedEnhancer implements BeanPostProcessor {
                         for (AttributeProcessor attributeProcessor : attributeProcessors) {
                             if (attributeProcessor.supports(beanDeclaredField)) {
                                 try {
-                                    attributeProcessor.processor(superclassDeclaredField, object);
+                                    attributeProcessor.processor(superclassDeclaredField, proxyObject);
                                 } catch (Throwable throwable) {
                                     throwable.printStackTrace();
                                 }
@@ -144,18 +182,32 @@ public class SwitchLoggerAnnotatedEnhancer implements BeanPostProcessor {
             }
             originClass = superclass;
         }
-
-        if (object != null) {
-            beanFactory.registerSingleton(beanName, object);
-        }
-
-        return object;
     }
 
+    /**
+     * checkLegal by Method
+     * <p>
+     * The method type must be public and not static and final
+     *
+     * @param method method
+     * @return boolean
+     * @author Eric
+     * @date 2021/1/14 23:30
+     */
     private boolean checkLegal(Method method) {
         return ReflectUtils.isPublic(method) && !ReflectUtils.isStatic(method) && !ReflectUtils.isFinal(method);
     }
 
+    /**
+     * checkLegal by ClassType
+     * <p>
+     * The class type must be public and not static and final
+     *
+     * @param clazz clazz
+     * @return boolean
+     * @author Eric
+     * @date 2021/1/14 23:30
+     */
     private boolean checkLegal(Class<?> clazz) {
         return ReflectUtils.isPublic(clazz) && !ReflectUtils.isStatic(clazz) && !ReflectUtils.isFinal(clazz);
     }

@@ -5,7 +5,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.lang.reflect.Field;
 
 /**
- * AutowriedAttributeProcessor
+ * AutowiredAttributeProcessor
+ *
+ * Handle annotations that contain @Autowired in the parent class
  *
  * @author Eric Joe
  * @version 1.0

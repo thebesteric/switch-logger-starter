@@ -195,7 +195,6 @@ public class SwitchLoggerConfig {
         return new LogRecordProcessor();
     }
 
-    // byDefault
     @Bean(name = "switchLoggerStdoutRecordProcessor")
     public RecordProcessor stdoutRecordProcessor() {
         return new StdoutRecordProcessor();
