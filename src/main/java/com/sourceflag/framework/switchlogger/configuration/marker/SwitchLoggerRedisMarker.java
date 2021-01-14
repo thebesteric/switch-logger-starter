@@ -6,7 +6,7 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.lang.NonNull;
 
 /**
- * SwitchLoggerReidsMarker
+ * SwitchLoggerRedisMarker
  *
  * @author Eric Joe
  * @version 1.0
