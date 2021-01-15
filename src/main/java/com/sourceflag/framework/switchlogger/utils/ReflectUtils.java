@@ -1,5 +1,6 @@
 package com.sourceflag.framework.switchlogger.utils;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -89,6 +90,19 @@ public class ReflectUtils {
             fieldNames.add(field.getName());
         }
         return fieldNames;
+    }
+
+    public static boolean isAnnotationPresent(Class<?> objectClass, Class<? extends Annotation> annotationClass) {
+        if (objectClass.isAnnotationPresent(annotationClass)) {
+            return true;
+        } else {
+            for (Method method : objectClass.getDeclaredMethods()) {
+                if (method.isAnnotationPresent(annotationClass)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 }

@@ -34,13 +34,11 @@ import java.util.regex.Pattern;
 @Slf4j
 public class SwitchLoggerFilter extends SwitchLoggerFilterWrapper {
 
-    private SwitchLoggerProperties properties;
-
-    private List<RecordProcessor> recordProcessors;
+    private final SwitchLoggerProperties properties;
+    private final List<RecordProcessor> recordProcessors;
+    private final IgnoreUrlProcessor ignoreUrlProcessor;
 
     private RequestLoggerProcessor requestLoggerProcessor;
-
-    private IgnoreUrlProcessor ignoreUrlProcessor;
 
     public SwitchLoggerFilter(SwitchLoggerProperties properties, List<RecordProcessor> recordProcessors,
                               RequestLoggerProcessor requestLoggerProcessor, IgnoreUrlProcessor ignoreUrlProcessor) {

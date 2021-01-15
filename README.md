@@ -81,7 +81,7 @@ public class RequestMappingProcessor implements MappingProcessor {
     @Override
     public boolean supports(Method method) {
         this.method = method;
-        return method.getAnnotation(RequestMapping.class) != null;
+        return method.isAnnotationPresent(RequestMapping.class);
     }
 
     @Override

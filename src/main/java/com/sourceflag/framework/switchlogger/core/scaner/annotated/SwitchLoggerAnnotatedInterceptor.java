@@ -5,6 +5,7 @@ import com.sourceflag.framework.switchlogger.configuration.SwitchLoggerPropertie
 import com.sourceflag.framework.switchlogger.core.domain.InvokeLog;
 import com.sourceflag.framework.switchlogger.core.processor.RecordProcessor;
 import com.sourceflag.framework.switchlogger.core.wrapper.SwitchLoggerFilterWrapper;
+import com.sourceflag.framework.switchlogger.utils.StringUtils;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -52,8 +53,8 @@ public class SwitchLoggerAnnotatedInterceptor implements MethodInterceptor {
             CompletableFuture.runAsync(() -> {
                 InvokeLog invokeLog = new InvokeLog();
                 invokeLog.setCreatedTime(System.currentTimeMillis());
-                invokeLog.setTag(switchLoggerAnnotationInfo.getAnnotationTag());
-                invokeLog.setExtra(switchLoggerAnnotationInfo.getAnnotationExtra());
+                invokeLog.setTag(switchLoggerAnnotationInfo.getTag());
+                invokeLog.setExtra(switchLoggerAnnotationInfo.getExtra());
                 invokeLog.setResult(finalResult);
                 invokeLog.setTrackId(trackId);
                 invokeLog.setException(finalException);
@@ -82,13 +83,16 @@ public class SwitchLoggerAnnotatedInterceptor implements MethodInterceptor {
         // Check if the class contains @SwitchLogger
         if (method.getDeclaringClass().isAnnotationPresent(SwitchLogger.class)) {
             SwitchLogger classAnnotation = method.getDeclaringClass().getDeclaredAnnotation(SwitchLogger.class);
-            builder.classAnnotationTag(classAnnotation.tag()).classAnnotationExtra(classAnnotation.extra());
+            builder.classTag(classAnnotation.tag()).classExtra(classAnnotation.extra());
         }
         // Check if the method contains @SwitchLogger
         if (method.isAnnotationPresent(SwitchLogger.class)) {
             SwitchLogger methodAnnotation = method.getDeclaredAnnotation(SwitchLogger.class);
-            builder.methodAnnotationTag(methodAnnotation.tag()).methodAnnotationExtra(methodAnnotation.extra());
+            builder.methodTag(methodAnnotation.tag()).methodExtra(methodAnnotation.extra());
         }
+
+        // default tag
+        builder.defaultTag(StringUtils.lowerFirst(method.getDeclaringClass().getSimpleName()));
 
         return builder.build();
     }
@@ -99,17 +103,17 @@ public class SwitchLoggerAnnotatedInterceptor implements MethodInterceptor {
     @Builder
     private static class SwitchLoggerAnnotationInfo {
 
-        String classAnnotationTag, methodAnnotationTag;
-        String[] classAnnotationExtra, methodAnnotationExtra;
+        private String classTag, methodTag, defaultTag;
+        private String[] classExtra, methodExtra;
 
         // Method tag first
-        public String getAnnotationTag() {
-            return methodAnnotationTag == null ? classAnnotationTag : methodAnnotationTag;
+        public String getTag() {
+            return !StringUtils.isEmpty(methodTag) ? methodTag : !StringUtils.isEmpty(classTag) ? classTag : defaultTag;
         }
 
         // Method extra first
-        public String[] getAnnotationExtra() {
-            return methodAnnotationExtra == null ? classAnnotationExtra : methodAnnotationExtra;
+        public String[] getExtra() {
+            return methodExtra != null ? methodExtra : classExtra;
         }
 
     }

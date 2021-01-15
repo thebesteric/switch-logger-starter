@@ -16,8 +16,10 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.lang.reflect.*;
-import java.util.Arrays;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.List;
 
 /**
@@ -33,22 +35,20 @@ public class SwitchLoggerAnnotatedEnhancer implements BeanPostProcessor {
 
     private static final String SPRING_CGLIB_SEPARATOR = "$$";
 
-    private Enhancer enhancer = new Enhancer();
+    private final Enhancer enhancer = new Enhancer();
 
     private final ConfigurableListableBeanFactory beanFactory;
     private final SwitchLoggerProperties properties;
     private final List<RecordProcessor> recordProcessors;
     private final List<AttributeProcessor> attributeProcessors;
 
-    // Not proxy layer
-    private static final List<Class<?>> notProxyClasses = Arrays.asList(Controller.class, RestController.class);
-
     @Override
-    public Object postProcessAfterInitialization(@NonNull Object bean, String beanName) throws BeansException {
+    public Object postProcessAfterInitialization(@NonNull Object bean, @NonNull String beanName) throws BeansException {
         Class<?> beanClass = bean.getClass();
 
         // Not proxy layer
-        if (notProxyClasses.contains(beanClass)) {
+        if ((beanClass.isAnnotationPresent(Controller.class) || beanClass.isAnnotationPresent(RestController.class))
+                && !ReflectUtils.isAnnotationPresent(beanClass, SwitchLogger.class)) {
             return bean;
         }
 
@@ -167,8 +167,8 @@ public class SwitchLoggerAnnotatedEnhancer implements BeanPostProcessor {
 
     private void injectAttributes(Field[] declaredFields, Object proxyObject) {
         for (Field declaredField : declaredFields) {
-            boolean isFinal = Modifier.isFinal(declaredField.getModifiers());
-            boolean isStatic = Modifier.isStatic(declaredField.getModifiers());
+            boolean isFinal = ReflectUtils.isFinal(declaredField);
+            boolean isStatic = ReflectUtils.isStatic(declaredField);
             if (!isFinal && !isStatic) {
                 for (AttributeProcessor attributeProcessor : attributeProcessors) {
                     if (attributeProcessor.supports(declaredField)) {
