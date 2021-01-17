@@ -19,7 +19,7 @@ import java.util.List;
  */
 public class SwitchLoggerControllerScanner implements SwitchLoggerScanner {
 
-    private List<MappingProcessor> mappingProcessors;
+    private final List<MappingProcessor> mappingProcessors;
 
     public SwitchLoggerControllerScanner(List<MappingProcessor> mappingProcessors){
         this.mappingProcessors = mappingProcessors;
