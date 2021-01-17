@@ -13,7 +13,164 @@ public class Application {
     }
 }
 ```
-添加上 `@EnableSwitchLogger` 后，即可对所有 Controller 层按照默认规则进行全局控制层日志记录
+添加上 `@EnableSwitchLogger` 后，即可对所有 Controller 层按照默认规则进行全局控制层日志记录  
+
+---
+
+当然我们也可以在 Service 层，Dao 层 分别在类上或方法上添加`@SwitchLogger`注解来监控方法执行过程
+> 当 Controller 层调用 Service 层，再有 Service 层调用 Dao 层的话，会串联为一个**日志跟踪链**
+
+```java
+@RestController
+@RequestMapping(value = "/test")
+public class TestController {
+
+    @Autowired
+    private TestFacade testFacade;
+
+    @GetMapping
+    public R test(@RequestParam String name) {
+        String wording = testFacade.sayHello(name, new Date());
+        return R.success().setData(wording);
+    }
+
+}
+
+@Component
+@SwitchLogger(tag = "facade")
+public class TestFacade {
+
+    @Autowired
+    private TestService testService;
+
+    @SwitchLogger(extra = "say hello to somebody")
+    public String sayHello(String name, Date date) {
+        return testService.say(name) + " at " + date.toLocaleString();
+    }
+
+}
+
+@Component
+@SwitchLogger(tag = "service")
+public class TestService {
+
+    public String say(String name) {
+        return "hello " + name;
+    }
+
+}
+
+// [17:17:38:702] [INFO] - com.sourceflag.framework.switchlogger.core.processor.record.LogRecordProcessor.processor(LogRecordProcessor.java:28) - {"tag":"service","type":"info","result":"hello 张三","exception":null,"extra":["just say hello to somebody"],"track_id":"F0BBA7C71D0D45D590AA6FA0C7822F89","created_time":1610875058681,"execute_info":{"className":"com.sbux.ecommerce.hazelnut.TestService","methodInfo":{"methodName":"say","signatures":{"name":"java.lang.String"},"arguments":{"name":"张三"},"returnType":"java.lang.String"},"duration":3,"start_time":1610875058675}}
+// [17:17:38:703] [INFO] - com.sourceflag.framework.switchlogger.core.processor.record.LogRecordProcessor.processor(LogRecordProcessor.java:28) - {"tag":"facade","type":"info","result":"hello 张三 at 2021年1月17日 下午5:17:38","exception":null,"extra":["say hello to somebody with current date"],"track_id":"F0BBA7C71D0D45D590AA6FA0C7822F89","created_time":1610875058683,"execute_info":{"className":"com.sbux.ecommerce.hazelnut.TestFacade","methodInfo":{"methodName":"sayHello","signatures":{"name":"java.lang.String","date":"java.util.Date"},"arguments":{"name":"张三","date":1610875058666},"returnType":"java.lang.String"},"duration":15,"start_time":1610875058668}}
+// [17:17:38:732] [INFO] - com.sourceflag.framework.switchlogger.core.processor.record.LogRecordProcessor.processor(LogRecordProcessor.java:28) - {"tag":"default","type":"info","result":{"code":200,"data":"hello 张三 at 2021年1月17日 下午5:17:38","message":"SUCCEED","timestamp":1610875058688},"exception":null,"extra":null,"uri":"/test","url":"http://127.0.0.1:8081/test","method":"GET","protocol":"HTTP/1.1","cookies":[],"headers":{"x-customer-id":"123456","content-length":"195","postman-token":"861a8531-a70d-472f-93fc-6ed195282e38","host":"127.0.0.1:8081","content-type":"application/json","connection":"keep-alive","cache-control":"no-cache","accept-encoding":"gzip, deflate, br","x-app-version":"1","user-agent":"PostmanRuntime/7.26.8","accept":"*/*"},"params":{"sign":"123","name":"张三","lang":"zh"},"body":{"cartCode":"1","address":{"province":"上海","city":"上海市","district":"浦东新区","receivedAddress":"南京西路23弄"}},"track_id":"F0BBA7C71D0D45D590AA6FA0C7822F89","created_time":1610875058717,"execute_info":{"className":"com.sbux.ecommerce.hazelnut.TestController","methodInfo":{"methodName":"test","signatures":{"name":"java.lang.String"},"arguments":{},"returnType":"com.sbux.ecommerce.hazelnut.assets.controller.R"},"duration":85,"start_time":1610875058631},"request_session_id":null,"server_name":"127.0.0.1","remote_addr":"127.0.0.1","remote_port":5818,"query_string":"sign=123&lang=zh&name=%E5%BC%A0%E4%B8%89","origin_body":"{    \"cartCode\" : \"1\",    \"address\": {        \"province\":\"上海\",        \"city\":\"上海市\",        \"district\":\"浦东新区\",        \"receivedAddress\": \"南京西路23弄\"    }}"}
+
+```
+
+### 日志格式
+
+日志格式包括 API 层日志格式和方法调用层日志格式两种  
+- API 层日志格式包括一些常见的 HTTP 请求相关的信息，以及 API 执行信息
+- 方法调用层（Service、Dao）的日志格式包括方法执行的相关信息
+
+#### API 层日志格式
+```json
+{
+    "tag": "default",
+    "type": "info",
+    "result": {
+        "code": 200,
+        "data": "hello 张三 at 2021年1月17日 下午5:03:25",
+        "message": "SUCCEED",
+        "timestamp": 1610874205896
+    },
+    "exception": null,
+    "extra": null,
+    "uri": "/test",
+    "url": "http://127.0.0.1:8081/test",
+    "method": "GET",
+    "protocol": "HTTP/1.1",
+    "cookies": [],
+    "headers": {
+        "x-customer-id": "123456",
+        "content-length": "195",
+        "postman-token": "d4b39f31-079a-4f52-b3e1-4d6c2545e8eb",
+        "host": "127.0.0.1:8081",
+        "content-type": "application/json",
+        "connection": "keep-alive",
+        "cache-control": "no-cache",
+        "accept-encoding": "gzip, deflate, br",
+        "x-app-version": "1",
+        "user-agent": "PostmanRuntime/7.26.8",
+        "accept": "*/*"
+    },
+    "params": {
+        "sign": "123",
+        "name": "张三",
+        "lang": "zh"
+    },
+    "body": {
+        "cartCode": "1",
+        "address": {
+            "province": "上海",
+            "city": "上海市",
+            "district": "浦东新区",
+            "receivedAddress": "南京西路23弄"
+        }
+    },
+    "track_id": "F0BBA7C71D0D45D590AA6FA0C7822F89",
+    "created_time": 1610874205898,
+    "execute_info": {
+        "className": "com.sbux.ecommerce.hazelnut.TestController",
+        "methodInfo": {
+            "methodName": "test",
+            "signatures": {
+                "name": "java.lang.String"
+            },
+            "arguments": {},
+            "returnType": "com.sbux.ecommerce.hazelnut.assets.controller.R"
+        },
+        "duration": 4,
+        "start_time": 1610874205894
+    },
+    "request_session_id": null,
+    "server_name": "127.0.0.1",
+    "remote_addr": "127.0.0.1",
+    "remote_port": 5518,
+    "query_string": "sign=123&lang=zh&name=%E5%BC%A0%E4%B8%89",
+    "origin_body": "{    \"cartCode\" : \"1\",    \"address\": {        \"province\":\"上海\",        \"city\":\"上海市\",        \"district\":\"浦东新区\",        \"receivedAddress\": \"南京西路23弄\"    }}"
+}
+```
+#### 方法调用层日志格式
+```json
+{
+    "tag": "facade",
+    "type": "info",
+    "result": "hello 张三 at 2021年1月17日 下午5:17:38",
+    "exception": null,
+    "extra": [
+        "say hello to somebody with current date"
+    ],
+    "track_id": "F0BBA7C71D0D45D590AA6FA0C7822F89",
+    "created_time": 1610875058683,
+    "execute_info": {
+        "className": "com.sbux.ecommerce.hazelnut.TestFacade",
+        "methodInfo": {
+            "methodName": "sayHello",
+            "signatures": {
+                "name": "java.lang.String",
+                "date": "java.util.Date"
+            },
+            "arguments": {
+                "name": "张三",
+                "date": 1610875058666
+            },
+            "returnType": "java.lang.String"
+        },
+        "duration": 15,
+        "start_time": 1610875058668
+    }
+}
+```
 
 ### 配置
 ```yaml
@@ -22,16 +179,19 @@ sourceflag.switch-logger:
     model: log # logging mode, support log, stdout, mysql, redis, local cache
 ```
 - LOG 配置模式
+> 直接输出到日志文件
 ```yaml
 sourceflag.switch-logger:
     model: log
 ```
 - STDOUT 配置模式
+> 直接输出到控制台
 ```yaml
 sourceflag.switch-logger:
     model: log
 ```
 - MySQL 配置模式
+> 支持自动建表，无需手工维护表
 ```yaml
 sourceflag.switch-logger:
     model: database
@@ -43,6 +203,7 @@ sourceflag.switch-logger:
       password: "root"
 ```
 - Cache 配置模式
+> 根据的配置来决定日志保留的数量与时间
 ```yaml
 sourceflag.switch-logger:
     model: cache
@@ -52,6 +213,7 @@ sourceflag.switch-logger:
       expired-time: 3600
 ```
 - Redis 配置模式
+> 根据配置来决定日志保留的时间
 ```yaml
 sourceflag.switch-logger:
     model: redis
