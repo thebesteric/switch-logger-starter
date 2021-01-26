@@ -64,7 +64,7 @@ import java.util.regex.Pattern;
 @EnableAsync
 @ConditionalOnBean(SwitchLoggerMarker.class)
 @EnableConfigurationProperties(SwitchLoggerProperties.class)
-public class SwitchLoggerConfig {
+public class SwitchLoggerAutoConfiguration {
 
     @Resource
     private Environment environment;
