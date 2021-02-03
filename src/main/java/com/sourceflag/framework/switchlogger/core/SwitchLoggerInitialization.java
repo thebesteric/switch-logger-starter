@@ -83,9 +83,9 @@ public class SwitchLoggerInitialization implements SmartLifecycle, ApplicationCo
             }
         }
 
-        String projectPath = getProjectPath();
-        log.info("PROJECT_PATH is {}, RECORD_MODEL is {}", projectPath, model.toUpperCase());
+        log.info("Switch Logger Record Model is {}", model.toUpperCase());
 
+        String projectPath = getProjectPath();
         // scanner @Controller and @SwitchLogger and so on
         for (SwitchLoggerScanner switchLoggerScanner : switchLoggerScanners) {
             switchLoggerScanner.doScan(new File(projectPath + "/"), properties.getCompilePath());
@@ -93,7 +93,8 @@ public class SwitchLoggerInitialization implements SmartLifecycle, ApplicationCo
 
         // print url_mapping to console
         if (log.isTraceEnabled()) {
-            SwitchLoggerFilterWrapper.URL_MAPPING.forEach((k, v) -> log.info("SWITCH LOGGER SCAN {} => {}", k, v.getName()));
+            log.info("Switch Logger Project Path is {}", projectPath);
+            SwitchLoggerFilterWrapper.URL_MAPPING.forEach((k, v) -> log.info("Switch Logger Scan {} => {}", k, v.getName()));
         }
     }
 

@@ -142,7 +142,9 @@ public class SwitchLoggerAnnotatedEnhancer implements BeanPostProcessor {
             beanFactory.registerSingleton(beanName, object);
         }
 
-        return object == null ? bean : object;
+        // TODO maybe has problem
+        // return object == null ? bean : object;
+        return bean;
     }
 
     /**
