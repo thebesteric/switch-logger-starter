@@ -362,3 +362,5 @@ public class UserService {
 框架默认支持自定义 `track-id`, `x-track-id`, `transaction-id`, `x-transaction-id` 四种 trackId 作为自定义 header
 > `TrackId` 主要用于我们在进行多层链路调用时的唯一标识  
 > 如果我们在 header 中指定了上述的其中一种，则框架默认会使用我们自定义的值，否则框架会自动生成一个 UUID 作为 trackId 的值
+
+- 项目中可以使用 `TransactionUtils.get()` 来获取`trackId`

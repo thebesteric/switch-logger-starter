@@ -6,8 +6,13 @@ import com.sourceflag.framework.switchlogger.annotation.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.LinkedHashMap;
@@ -96,7 +101,7 @@ public class InvokeLog extends AbstractEntity {
                         Parameter param = params[i];
                         signatures.put(param.getName(), param.getParameterizedType().getTypeName());
                         if (args != null) {
-                            if (param.getParameterizedType() == HttpServletRequest.class || param.getParameterizedType() == HttpServletRequest.class) {
+                            if (simplicityInTreatment(param)) {
                                 arguments.put(param.getName(), param.getParameterizedType().getTypeName());
                             } else {
                                 arguments.put(param.getName(), args[i]);
@@ -107,8 +112,17 @@ public class InvokeLog extends AbstractEntity {
                 this.returnType = method.getReturnType().getName();
             }
 
+            private boolean simplicityInTreatment(Parameter param) {
+                return ServletRequest.class.isAssignableFrom(param.getType())
+                        || ServletResponse.class.isAssignableFrom(param.getType())
+                        || MultipartFile.class.isAssignableFrom(param.getType())
+                        || File.class.isAssignableFrom(param.getType())
+                        || InputStream.class.isAssignableFrom(param.getType())
+                        || OutputStream.class.isAssignableFrom(param.getType());
+            }
         }
 
     }
+
 
 }
