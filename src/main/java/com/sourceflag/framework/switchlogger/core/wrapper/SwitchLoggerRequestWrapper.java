@@ -2,7 +2,6 @@ package com.sourceflag.framework.switchlogger.core.wrapper;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sourceflag.framework.switchlogger.utils.JsonUtils;
-import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
 
 import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
@@ -30,7 +29,7 @@ public class SwitchLoggerRequestWrapper extends HttpServletRequestWrapper {
     public SwitchLoggerRequestWrapper(HttpServletRequest request) {
         super(request);
         byte[] temp = null;
-        if (!ServletFileUpload.isMultipartContent(request)) {
+        if (canBeConvert(request)) {
             try (BufferedReader reader = request.getReader()) {
                 StringBuilder sb = new StringBuilder();
                 String line;
@@ -93,5 +92,18 @@ public class SwitchLoggerRequestWrapper extends HttpServletRequestWrapper {
                 return byteArrayInputStream.read();
             }
         };
+    }
+
+    private boolean canBeConvert(HttpServletRequest request) {
+        if ("POST".equalsIgnoreCase(request.getMethod())) {
+            String contentType = request.getContentType();
+            if (contentType != null) {
+                contentType = contentType.toLowerCase();
+                return !contentType.startsWith("multipart/")
+                        && !contentType.startsWith("application/x-www-form-urlencoded")
+                        && !contentType.startsWith("application/octet-stream");
+            }
+        }
+        return true;
     }
 }
