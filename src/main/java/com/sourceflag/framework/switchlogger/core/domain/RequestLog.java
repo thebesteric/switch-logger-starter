@@ -31,7 +31,7 @@ public class RequestLog extends InvokeLog {
         this.type = responseWrapper.getType();
 
         // exception
-        this.exception = responseWrapper.getException().getMessage();
+        this.exception = responseWrapper.getException() != null ? responseWrapper.getException().getMessage() : null;
 
         // createdTime
         this.createdTime = System.currentTimeMillis();
