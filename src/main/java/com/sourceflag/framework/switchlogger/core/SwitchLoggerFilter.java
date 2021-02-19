@@ -84,6 +84,7 @@ public class SwitchLoggerFilter extends SwitchLoggerFilterWrapper {
         } catch (Exception ex) {
             ex.printStackTrace();
             responseWrapper.setType(RequestLog.TYPE_ERROR);
+            responseWrapper.setException(ex);
             responseWrapper.setBuffer(ex.getMessage());
         }
         long duration = DurationWatch.stop();

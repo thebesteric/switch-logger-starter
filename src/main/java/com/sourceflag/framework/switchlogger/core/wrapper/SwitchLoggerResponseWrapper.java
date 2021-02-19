@@ -28,6 +28,10 @@ public class SwitchLoggerResponseWrapper extends HttpServletResponseWrapper {
     @Setter
     private String type = RequestLog.TYPE_INFO;
 
+    @Getter
+    @Setter
+    private Exception exception;
+
     public SwitchLoggerResponseWrapper(HttpServletResponse response) {
         super(response);
         buffer = new ByteArrayOutputStream();
