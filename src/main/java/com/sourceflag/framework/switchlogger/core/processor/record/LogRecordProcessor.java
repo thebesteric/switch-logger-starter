@@ -25,6 +25,15 @@ public class LogRecordProcessor implements RecordProcessor {
 
     @Override
     public void processor(InvokeLog invokeLog) throws JsonProcessingException {
-        log.info(JsonUtils.mapper.writeValueAsString(invokeLog));
+        switch (invokeLog.getLevel()) {
+            case InvokeLog.LEVEL_ERROR:
+                log.error(JsonUtils.mapper.writeValueAsString(invokeLog));
+                break;
+            case InvokeLog.LEVEL_WARN:
+                log.warn(JsonUtils.mapper.writeValueAsString(invokeLog));
+                break;
+            default:
+                log.info(JsonUtils.mapper.writeValueAsString(invokeLog));
+        }
     }
 }
