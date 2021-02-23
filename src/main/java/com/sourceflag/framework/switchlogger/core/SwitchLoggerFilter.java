@@ -83,7 +83,7 @@ public class SwitchLoggerFilter extends SwitchLoggerFilterWrapper {
             filterChain.doFilter(requestWrapper, responseWrapper);
         } catch (Exception ex) {
             ex.printStackTrace();
-            responseWrapper.setType(RequestLog.TYPE_ERROR);
+            responseWrapper.setLevel(RequestLog.LEVEL_ERROR);
             responseWrapper.setException(ex);
             responseWrapper.setBuffer(ex.getMessage());
         }

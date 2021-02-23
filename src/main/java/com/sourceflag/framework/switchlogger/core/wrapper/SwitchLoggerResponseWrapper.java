@@ -26,7 +26,7 @@ public class SwitchLoggerResponseWrapper extends HttpServletResponseWrapper {
 
     @Getter
     @Setter
-    private String type = RequestLog.TYPE_INFO;
+    private String level = RequestLog.LEVEL_INFO;
 
     @Getter
     @Setter

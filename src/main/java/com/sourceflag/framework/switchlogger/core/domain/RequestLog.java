@@ -28,7 +28,7 @@ public class RequestLog extends InvokeLog {
     public RequestLog(SwitchLoggerRequestWrapper requestWrapper, SwitchLoggerResponseWrapper responseWrapper, ThreadLocal<String> trackIdThreadLocal) throws IOException {
 
         // type
-        this.type = responseWrapper.getType();
+        this.level = responseWrapper.getLevel();
 
         // exception
         this.exception = responseWrapper.getException() != null ? responseWrapper.getException().getMessage() : null;

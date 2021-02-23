@@ -31,14 +31,15 @@ import java.util.LinkedHashMap;
 @Table(name = "invoke")
 public class InvokeLog extends AbstractEntity {
 
-    public static final String TYPE_INFO = "info";
-    public static final String TYPE_ERROR = "error";
+    public static final String LEVEL_INFO = "INFO";
+    public static final String LEVEL_ERROR = "ERROR";
+    public static final String LEVEL_WARN = "WARN";
 
     @Column(length = 64)
     protected String tag = "default";
 
     @Column(length = 64)
-    protected String type = TYPE_INFO;
+    protected String level = LEVEL_INFO;
 
     // to tracking controller -> method_1 -> method_2 -> ... 's link
     @JsonProperty("track_id")

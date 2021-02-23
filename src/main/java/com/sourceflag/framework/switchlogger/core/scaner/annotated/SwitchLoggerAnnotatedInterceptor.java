@@ -60,7 +60,7 @@ public class SwitchLoggerAnnotatedInterceptor implements MethodInterceptor {
                 invokeLog.setException(finalException);
                 invokeLog.setExecuteInfo(new InvokeLog.ExecuteInfo(method, args, startTime, finalDurationTime));
                 if (finalException != null) {
-                    invokeLog.setType(InvokeLog.TYPE_ERROR);
+                    invokeLog.setLevel(InvokeLog.LEVEL_ERROR);
                 }
 
                 // process log
