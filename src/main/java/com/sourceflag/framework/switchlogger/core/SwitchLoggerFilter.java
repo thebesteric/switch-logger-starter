@@ -91,6 +91,7 @@ public class SwitchLoggerFilter extends SwitchLoggerFilterWrapper {
 
         // record request info
         RequestLog requestLog = generateRequestLoggerProcessor().processor(requestWrapper, responseWrapper, URL_MAPPING, trackIdThreadLocal, duration);
+        requestLog.setTag(RequestLog.DEFAULT_TAG);
 
         // recorder request log
         for (RecordProcessor recordProcessor : recordProcessors) {
