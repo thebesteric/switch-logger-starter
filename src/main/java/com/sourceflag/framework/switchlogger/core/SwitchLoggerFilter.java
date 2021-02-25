@@ -159,15 +159,4 @@ public class SwitchLoggerFilter extends SwitchLoggerFilterWrapper {
         return passed;
     }
 
-    @Deprecated
-    private void doProcessor(RecordProcessor recordProcessor, InvokeLog invokeLog) {
-        CompletableFuture.runAsync(() -> {
-            try {
-                recordProcessor.processor(invokeLog);
-            } catch (Throwable throwable) {
-                throwable.printStackTrace();
-            }
-        });
-    }
-
 }
