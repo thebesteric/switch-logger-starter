@@ -29,7 +29,7 @@ import java.util.List;
  */
 @Slf4j
 @RequiredArgsConstructor
-public class DatabaseRecordProcessor implements RecordProcessor {
+public class DatabaseRecordProcessor extends AbstractSingleThreadRecordProcessor {
 
     @Qualifier("switchLoggerJdbcTemplate")
     private final SwitchJdbcTemplate jdbcTemplate;
@@ -49,7 +49,7 @@ public class DatabaseRecordProcessor implements RecordProcessor {
     }
 
     @Override
-    public void processor(InvokeLog invokeLog) throws Throwable {
+    public void doProcess(InvokeLog invokeLog) throws Throwable {
         String tableName = parseTableName(invokeLog.getClass());
         String[] insertProperties = getInsertProperties(invokeLog.getClass());
         String sql = "INSERT INTO " + tableName + " (" + insertProperties[0] + ") VALUES (" + insertProperties[1] + ")";

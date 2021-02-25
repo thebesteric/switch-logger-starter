@@ -38,7 +38,11 @@ public class RedisRecordProcessor implements Runnable, RecordProcessor {
 
     @Override
     public void run() {
-        Long result = redisTemplate.opsForZSet().removeRangeByScore(properties.getRedis().getKey(), 0, System.currentTimeMillis() - properties.getRedis().getExpiredTime() * 1000);
+        removeExpired();
+    }
+
+    private void removeExpired() {
+        Long result = redisTemplate.opsForZSet().removeRangeByScore(properties.getRedis().getKey(), 0, System.currentTimeMillis() - properties.getRedis().getExpiredTime() * 1000L);
         log.debug("Clear {} expired data from Redis", result == null ? 0 : result);
     }
 }

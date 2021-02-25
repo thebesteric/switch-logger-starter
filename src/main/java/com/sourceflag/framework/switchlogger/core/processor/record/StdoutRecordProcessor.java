@@ -14,14 +14,23 @@ import com.sourceflag.framework.switchlogger.utils.JsonUtils;
  * @date 2020-11-29 23:33
  * @since 1.0
  */
-public class StdoutRecordProcessor implements RecordProcessor {
+public class StdoutRecordProcessor extends AbstractSingleThreadRecordProcessor {
     @Override
     public boolean supports(String model) throws UnsupportedModelException {
         return model != null && !model.trim().equals("") && SwitchLoggerProperties.ModelType.STDOUT.name().equalsIgnoreCase(model);
     }
 
     @Override
-    public void processor(InvokeLog invokeLog) throws Throwable {
-        System.out.println(JsonUtils.mapper.writeValueAsString(invokeLog));
+    public void doProcess(InvokeLog invokeLog) throws Throwable {
+        String jsonLog = JsonUtils.mapper.writeValueAsString(invokeLog);
+        switch (invokeLog.getLevel()) {
+            case InvokeLog.LEVEL_ERROR:
+            case InvokeLog.LEVEL_WARN:
+                System.err.println(jsonLog);
+                break;
+            default:
+                System.out.println(jsonLog);
+        }
+
     }
 }

@@ -66,7 +66,7 @@ public class SwitchLoggerInitialization implements SmartLifecycle, ApplicationCo
             if (expiredTime >= 0) {
                 ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(1,
                         new BasicThreadFactory.Builder().namingPattern("redis-record-schedule-pool-%d").daemon(true).build());
-                executorService.scheduleAtFixedRate(getBean(RedisRecordProcessor.class), 0, expiredTime * 1000 / 4, TimeUnit.SECONDS);
+                executorService.scheduleAtFixedRate(getBean(RedisRecordProcessor.class), 0, expiredTime * 1000L / 4, TimeUnit.SECONDS);
             }
         } else if (SwitchLoggerProperties.ModelType.DATABASE.name().equalsIgnoreCase(model)) {
             if ("mysql".equalsIgnoreCase(properties.getDatabase().getType())) {

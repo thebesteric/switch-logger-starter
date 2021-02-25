@@ -18,7 +18,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
  */
 @Slf4j
 @RequiredArgsConstructor
-public class CacheRecordProcessor implements RecordProcessor {
+public class CacheRecordProcessor extends AbstractSingleThreadRecordProcessor {
 
     @Qualifier("switchLoggerCache")
     private final Cache<String, Object> cache;
@@ -29,7 +29,7 @@ public class CacheRecordProcessor implements RecordProcessor {
     }
 
     @Override
-    public void processor(InvokeLog invokeLog) throws Throwable {
+    public void doProcess(InvokeLog invokeLog) throws Throwable {
         cache.put(invokeLog.getTrackId(), invokeLog);
     }
 }

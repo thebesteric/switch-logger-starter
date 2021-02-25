@@ -3,7 +3,6 @@ package com.sourceflag.framework.switchlogger.core.processor.record;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sourceflag.framework.switchlogger.configuration.SwitchLoggerProperties;
 import com.sourceflag.framework.switchlogger.core.domain.InvokeLog;
-import com.sourceflag.framework.switchlogger.core.processor.RecordProcessor;
 import com.sourceflag.framework.switchlogger.utils.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -16,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
  * @since 1.0
  */
 @Slf4j
-public class LogRecordProcessor implements RecordProcessor {
+public class LogRecordProcessor extends AbstractSingleThreadRecordProcessor {
 
     @Override
     public boolean supports(String model) {
@@ -24,16 +23,17 @@ public class LogRecordProcessor implements RecordProcessor {
     }
 
     @Override
-    public void processor(InvokeLog invokeLog) throws JsonProcessingException {
+    public void doProcess(InvokeLog invokeLog) throws JsonProcessingException {
+        String jsonLog = JsonUtils.mapper.writeValueAsString(invokeLog);
         switch (invokeLog.getLevel()) {
             case InvokeLog.LEVEL_ERROR:
-                log.error(JsonUtils.mapper.writeValueAsString(invokeLog));
+                log.error(jsonLog);
                 break;
             case InvokeLog.LEVEL_WARN:
-                log.warn(JsonUtils.mapper.writeValueAsString(invokeLog));
+                log.warn(jsonLog);
                 break;
             default:
-                log.info(JsonUtils.mapper.writeValueAsString(invokeLog));
+                log.info(jsonLog);
         }
     }
 }

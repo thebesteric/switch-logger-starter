@@ -96,7 +96,7 @@ public class SwitchLoggerFilter extends SwitchLoggerFilterWrapper {
         // recorder request log
         for (RecordProcessor recordProcessor : recordProcessors) {
             if (recordProcessor.supports(properties.getModel())) {
-                doProcessor(recordProcessor, requestLog);
+                recordProcessor.processor(requestLog);
                 break;
             }
         }
@@ -159,7 +159,8 @@ public class SwitchLoggerFilter extends SwitchLoggerFilterWrapper {
         return passed;
     }
 
-    public void doProcessor(RecordProcessor recordProcessor, InvokeLog invokeLog) {
+    @Deprecated
+    private void doProcessor(RecordProcessor recordProcessor, InvokeLog invokeLog) {
         CompletableFuture.runAsync(() -> {
             try {
                 recordProcessor.processor(invokeLog);
