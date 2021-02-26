@@ -2,9 +2,12 @@ package com.sourceflag.framework.switchlogger.core.processor.record;
 
 import com.sourceflag.framework.switchlogger.core.domain.InvokeLog;
 import com.sourceflag.framework.switchlogger.core.processor.RecordProcessor;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * AbstractSingleThreadRecordProcessor
@@ -16,11 +19,13 @@ import java.util.concurrent.Executors;
  */
 public abstract class AbstractSingleThreadRecordProcessor implements RecordProcessor {
 
-    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private final ExecutorService pool = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
+            new LinkedBlockingQueue<>(1024), new BasicThreadFactory.Builder().namingPattern("switch-logger-record-pool-%d").daemon(true).build(),
+            new ThreadPoolExecutor.CallerRunsPolicy());
 
     @Override
     public void processor(InvokeLog invokeLog) throws Throwable {
-        executorService.execute(() -> {
+        pool.execute(() -> {
             try {
                 doProcess(invokeLog);
             } catch (Throwable throwable) {
