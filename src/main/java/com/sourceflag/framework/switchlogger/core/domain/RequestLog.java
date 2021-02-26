@@ -67,7 +67,7 @@ public class RequestLog extends InvokeLog {
         this.body = requestWrapper.getBody();
 
         // originBody
-        this.originBody = requestWrapper.getOriginBody();
+        this.rawBody = requestWrapper.getRawBody();
 
         // result
         byte[] bytes = responseWrapper.getByteArray();
@@ -147,9 +147,9 @@ public class RequestLog extends InvokeLog {
     @Column(type = "json")
     private Object body;
 
-    @JsonProperty("origin_body")
+    @JsonProperty("raw_body")
     @Column(length = 2048)
-    private String originBody;
+    private String rawBody;
 
     @Data
     @EqualsAndHashCode(callSuper = true)

@@ -30,34 +30,49 @@ public class SwitchLoggerRequestWrapper extends HttpServletRequestWrapper {
         super(request);
         byte[] temp = null;
         if (canBeConvert(request)) {
-            try (BufferedReader reader = request.getReader()) {
-                StringBuilder sb = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line);
-                }
-                temp = sb.toString().getBytes();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            temp = getRequestBody(request);
         }
         body = temp;
     }
 
-    public String getOriginBody() {
-        if (this.body != null) {
+    private byte[] getRequestBody(HttpServletRequest request) {
+        byte[] buffer = null;
+        int len = request.getContentLength();
+        if (len > 0) {
+            buffer = new byte[len];
+            ServletInputStream in = null;
+            try {
+                in = request.getInputStream();
+                in.read(buffer, 0, len);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (in != null) {
+                    try {
+                        in.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        return buffer;
+    }
+
+    public String getRawBody() {
+        if (this.body != null && this.body.length > 0) {
             return new String(this.body, StandardCharsets.UTF_8);
         }
         return null;
     }
 
     public Object getBody() {
-        String originBody = getOriginBody();
-        if (originBody != null) {
+        String rawBody = getRawBody();
+        if (rawBody != null) {
             try {
-                return JsonUtils.mapper.readValue(originBody, Map.class);
+                return JsonUtils.mapper.readValue(rawBody, Map.class);
             } catch (JsonProcessingException e) {
-                return originBody;
+                return rawBody;
             }
         }
         return null;
