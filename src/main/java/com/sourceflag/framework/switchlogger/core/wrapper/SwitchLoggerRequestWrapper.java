@@ -110,14 +110,12 @@ public class SwitchLoggerRequestWrapper extends HttpServletRequestWrapper {
     }
 
     private boolean canBeConvert(HttpServletRequest request) {
-        if ("POST".equalsIgnoreCase(request.getMethod())) {
-            String contentType = request.getContentType();
-            if (contentType != null) {
-                contentType = contentType.toLowerCase();
-                return !contentType.startsWith("multipart/")
-                        && !contentType.startsWith("application/x-www-form-urlencoded")
-                        && !contentType.startsWith("application/octet-stream");
-            }
+        String contentType = request.getContentType();
+        if (contentType != null) {
+            contentType = contentType.toLowerCase();
+            return !contentType.startsWith("multipart/")
+                    && !contentType.startsWith("application/x-www-form-urlencoded")
+                    && !contentType.startsWith("application/octet-stream");
         }
         return true;
     }
