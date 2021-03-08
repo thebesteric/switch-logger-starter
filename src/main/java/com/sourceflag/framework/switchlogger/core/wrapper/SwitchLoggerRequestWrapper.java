@@ -28,7 +28,7 @@ public class SwitchLoggerRequestWrapper extends HttpServletRequestWrapper {
 
     public SwitchLoggerRequestWrapper(HttpServletRequest request) {
         super(request);
-        byte[] temp = null;
+        byte[] temp = new byte[0];
         if (canBeConvert(request)) {
             temp = getRequestBody(request);
         }
@@ -36,7 +36,7 @@ public class SwitchLoggerRequestWrapper extends HttpServletRequestWrapper {
     }
 
     private byte[] getRequestBody(HttpServletRequest request) {
-        byte[] buffer = null;
+        byte[] buffer = new byte[0];
         int len = request.getContentLength();
         if (len > 0) {
             buffer = new byte[len];
