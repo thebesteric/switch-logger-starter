@@ -24,7 +24,7 @@ import java.util.Map;
 public class DefaultRequestLoggerProcessor implements RequestLoggerProcessor {
     @Override
     public RequestLog processor(SwitchLoggerRequestWrapper requestWrapper, SwitchLoggerResponseWrapper responseWrapper, Map<String, Method> mapping, ThreadLocal<String> trackIdThreadLocal, long duration) throws IOException {
-        RequestLog requestLog = new RequestLog(requestWrapper, responseWrapper, trackIdThreadLocal);
+        RequestLog requestLog = new RequestLog(requestWrapper, responseWrapper, trackIdThreadLocal, duration);
         try {
             requestLog.setResult(JsonUtils.mapper.readTree(requestLog.getResult().toString()));
         } catch (Exception ex) {

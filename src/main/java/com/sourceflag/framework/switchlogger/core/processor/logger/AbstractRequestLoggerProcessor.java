@@ -27,6 +27,14 @@ public abstract class AbstractRequestLoggerProcessor implements RequestLoggerPro
         return doAfterProcessor(requestLog);
     }
 
+    /**
+     * Executes when DefaultRequestLoggerProcessor is processed
+     *
+     * @param requestLog requestLog
+     * @return com.sourceflag.framework.switchlogger.core.domain.RequestLog
+     * @author Eric
+     * @date 2021/3/9 16:14
+     */
     public abstract RequestLog doAfterProcessor(RequestLog requestLog);
 
 }

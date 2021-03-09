@@ -43,7 +43,7 @@ public class InvokeLog extends AbstractEntity {
     @Column(length = 64)
     protected String level = LEVEL_INFO;
 
-    // to tracking controller -> method_1 -> method_2 -> ... 's link
+    /** to tracking controller -> method_1 -> method_2 -> ... 's link */
     @JsonProperty("track_id")
     @Column(length = 64)
     protected String trackId;

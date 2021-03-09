@@ -25,7 +25,7 @@ import java.util.*;
 @Table(name = "request")
 public class RequestLog extends InvokeLog {
 
-    public RequestLog(SwitchLoggerRequestWrapper requestWrapper, SwitchLoggerResponseWrapper responseWrapper, ThreadLocal<String> trackIdThreadLocal) throws IOException {
+    public RequestLog(SwitchLoggerRequestWrapper requestWrapper, SwitchLoggerResponseWrapper responseWrapper, ThreadLocal<String> trackIdThreadLocal, long duration) throws IOException {
 
         // type
         this.level = responseWrapper.getLevel();
@@ -38,6 +38,9 @@ public class RequestLog extends InvokeLog {
 
         // trackId
         this.trackId = trackIdThreadLocal.get();
+
+        // duration
+        this.duration = duration;
 
         // params
         Enumeration<String> parameterNames = requestWrapper.getParameterNames();
@@ -150,6 +153,10 @@ public class RequestLog extends InvokeLog {
     @JsonProperty("raw_body")
     @Column(length = 2048)
     private String rawBody;
+
+    @JsonProperty("duration")
+    @Column(length = 11, type = "int")
+    private long duration;
 
     @Data
     @EqualsAndHashCode(callSuper = true)
