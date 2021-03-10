@@ -51,7 +51,7 @@ public class TestFacade {
 }
 
 @Component
-@SwitchLogger(tag = "service")
+@SwitchLogger(tag = "service", level = "DEBUG")
 public class TestService {
 
     public String say(String name) {
@@ -60,9 +60,9 @@ public class TestService {
 
 }
 
-// [17:17:38:702] [INFO] - com.sourceflag.framework.switchlogger.core.processor.record.LogRecordProcessor.processor(LogRecordProcessor.java:28) - {"tag":"service","type":"info","result":"hello 张三","exception":null,"extra":["just say hello to somebody"],"track_id":"F0BBA7C71D0D45D590AA6FA0C7822F89","created_time":1610875058681,"execute_info":{"className":"org.sourceflag.TestService","methodInfo":{"methodName":"say","signatures":{"name":"java.lang.String"},"arguments":{"name":"张三"},"returnType":"java.lang.String"},"duration":3,"start_time":1610875058675}}
-// [17:17:38:703] [INFO] - com.sourceflag.framework.switchlogger.core.processor.record.LogRecordProcessor.processor(LogRecordProcessor.java:28) - {"tag":"facade","type":"info","result":"hello 张三 at 2021年1月17日 下午5:17:38","exception":null,"extra":["say hello to somebody with current date"],"track_id":"F0BBA7C71D0D45D590AA6FA0C7822F89","created_time":1610875058683,"execute_info":{"className":"org.sourceflag.TestFacade","methodInfo":{"methodName":"sayHello","signatures":{"name":"java.lang.String","date":"java.util.Date"},"arguments":{"name":"张三","date":1610875058666},"returnType":"java.lang.String"},"duration":15,"start_time":1610875058668}}
-// [17:17:38:732] [INFO] - com.sourceflag.framework.switchlogger.core.processor.record.LogRecordProcessor.processor(LogRecordProcessor.java:28) - {"tag":"default","type":"info","result":{"code":200,"data":"hello 张三 at 2021年1月17日 下午5:17:38","message":"SUCCEED","timestamp":1610875058688},"exception":null,"extra":null,"uri":"/test","url":"http://127.0.0.1:8081/test","method":"GET","protocol":"HTTP/1.1","cookies":[],"headers":{"x-customer-id":"123456","content-length":"195","postman-token":"861a8531-a70d-472f-93fc-6ed195282e38","host":"127.0.0.1:8081","content-type":"application/json","connection":"keep-alive","cache-control":"no-cache","accept-encoding":"gzip, deflate, br","x-app-version":"1","user-agent":"PostmanRuntime/7.26.8","accept":"*/*"},"params":{"sign":"123","name":"张三","lang":"zh"},"body":{"cartCode":"1","address":{"province":"上海","city":"上海市","district":"浦东新区","receivedAddress":"南京西路23弄"}},"track_id":"F0BBA7C71D0D45D590AA6FA0C7822F89","created_time":1610875058717,"execute_info":{"className":"org.sourceflag.TestController","methodInfo":{"methodName":"test","signatures":{"name":"java.lang.String"},"arguments":{},"returnType":"org.sourceflag.controller.R"},"duration":85,"start_time":1610875058631},"request_session_id":null,"server_name":"127.0.0.1","remote_addr":"127.0.0.1","remote_port":5818,"query_string":"sign=123&lang=zh&name=%E5%BC%A0%E4%B8%89","origin_body":"{    \"cartCode\" : \"1\",    \"address\": {        \"province\":\"上海\",        \"city\":\"上海市\",        \"district\":\"浦东新区\",        \"receivedAddress\": \"南京西路23弄\"    }}"}
+// [17:17:38:702] [INFO] - com.sourceflag.framework.switchlogger.core.processor.record.LogRecordProcessor.processor(LogRecordProcessor.java:28) - {"tag":"service","level":"DEBUG","result":"hello 张三","exception":null,"extra":["just say hello to somebody"],"track_id":"F0BBA7C71D0D45D590AA6FA0C7822F89","created_time":1610875058681,"execute_info":{"className":"org.sourceflag.TestService","methodInfo":{"methodName":"say","signatures":{"name":"java.lang.String"},"arguments":{"name":"张三"},"returnType":"java.lang.String"},"duration":3,"start_time":1610875058675}}
+// [17:17:38:703] [INFO] - com.sourceflag.framework.switchlogger.core.processor.record.LogRecordProcessor.processor(LogRecordProcessor.java:28) - {"tag":"facade","level":"INFO","result":"hello 张三 at 2021年1月17日 下午5:17:38","exception":null,"extra":["say hello to somebody with current date"],"track_id":"F0BBA7C71D0D45D590AA6FA0C7822F89","created_time":1610875058683,"execute_info":{"className":"org.sourceflag.TestFacade","methodInfo":{"methodName":"sayHello","signatures":{"name":"java.lang.String","date":"java.util.Date"},"arguments":{"name":"张三","date":1610875058666},"returnType":"java.lang.String"},"duration":15,"start_time":1610875058668}}
+// [17:17:38:732] [INFO] - com.sourceflag.framework.switchlogger.core.processor.record.LogRecordProcessor.processor(LogRecordProcessor.java:28) - {"tag":"default","level":"INFO","result":{"code":200,"data":"hello 张三 at 2021年1月17日 下午5:17:38","message":"SUCCEED","timestamp":1610875058688},"exception":null,"extra":null,"uri":"/test","url":"http://127.0.0.1:8081/test","method":"GET","protocol":"HTTP/1.1","cookies":[],"headers":{"x-customer-id":"123456","content-length":"195","postman-token":"861a8531-a70d-472f-93fc-6ed195282e38","host":"127.0.0.1:8081","content-type":"application/json","connection":"keep-alive","cache-control":"no-cache","accept-encoding":"gzip, deflate, br","x-app-version":"1","user-agent":"PostmanRuntime/7.26.8","accept":"*/*"},"params":{"sign":"123","name":"张三","lang":"zh"},"body":{"cartCode":"1","address":{"province":"上海","city":"上海市","district":"浦东新区","receivedAddress":"南京西路23弄"}},"track_id":"F0BBA7C71D0D45D590AA6FA0C7822F89","created_time":1610875058717,"execute_info":{"className":"org.sourceflag.TestController","methodInfo":{"methodName":"test","signatures":{"name":"java.lang.String"},"arguments":{},"returnType":"org.sourceflag.controller.R"},"duration":85,"start_time":1610875058631},"request_session_id":null,"server_name":"127.0.0.1","remote_addr":"127.0.0.1","remote_port":5818,"query_string":"sign=123&lang=zh&name=%E5%BC%A0%E4%B8%89","origin_body":"{    \"cartCode\" : \"1\",    \"address\": {        \"province\":\"上海\",        \"city\":\"上海市\",        \"district\":\"浦东新区\",        \"receivedAddress\": \"南京西路23弄\"    }}"}
 
 ```
 
@@ -76,7 +76,7 @@ public class TestService {
 ```json
 {
     "tag": "default",
-    "type": "info",
+    "level": "INFO",
     "result": {
         "code": 200,
         "data": "hello 张三 at 2021年1月17日 下午5:03:25",
@@ -137,6 +137,7 @@ public class TestService {
     "remote_addr": "127.0.0.1",
     "remote_port": 5518,
     "query_string": "sign=123&lang=zh&name=%E5%BC%A0%E4%B8%89",
+    "duration": 66,
     "origin_body": "{    \"cartCode\" : \"1\",    \"address\": {        \"province\":\"上海\",        \"city\":\"上海市\",        \"district\":\"浦东新区\",        \"receivedAddress\": \"南京西路23弄\"    }}"
 }
 ```
@@ -144,7 +145,7 @@ public class TestService {
 ```json
 {
     "tag": "facade",
-    "type": "info",
+    "level": "INFO",
     "result": "hello 张三 at 2021年1月17日 下午5:17:38",
     "exception": null,
     "extra": [
@@ -291,7 +292,7 @@ public class SwitchLoggerConfiguration {
 }
 ```
 
-- RequestLoggerProcessor 接口: 可自定义日志处理规则（暂不支持数据库模式）
+- RequestLoggerProcessor 接口: 可自定义日志内容（暂不支持数据库模式）
 ```java
 @EnableSwitchLogger
 @Configuration
@@ -300,7 +301,7 @@ public class SwitchLoggerConfiguration {
     public RequestLoggerProcessor requestLoggerProcessor() {
         return new RequestLoggerProcessor() {
             @Override
-            public RequestLog processor(SwitchLoggerRequestWrapper switchLoggerRequestWrapper, SwitchLoggerResponseWrapper switchLoggerResponseWrapper, Map<String, Method> map, long l) throws IOException {
+            public RequestLog processor(SwitchLoggerRequestWrapper switchLoggerRequestWrapper, SwitchLoggerResponseWrapper switchLoggerResponseWrapper, Map<String, Method> map, long duration) throws IOException {
                 RequestLog requestLog = new RequestLog();
                 requestLog.setBody("Let me control");
                 return requestLog;
@@ -309,6 +310,22 @@ public class SwitchLoggerConfiguration {
     }
 }
 ``` 
+
+- AbstractRequestLoggerProcessor 抽象类: 实现了 RequestLoggerProcessor 接口，简化了日志处理
+```java
+public class SwitchLoggerConfiguration {
+    @Bean
+    public RequestLoggerProcessor requestLoggerProcessor() {
+        return new AbstractRequestLoggerProcessor() {
+            @Override
+            public RequestLog doAfterProcessor(RequestLog requestLog) {
+                requestLog.setRawBody(requestLog.getRawBody().substring(0, 20));
+                return requestLog;
+            }
+        };
+    }
+}
+```
 
 - AttributeProcessor 接口: 自定义注入属性解析器
 ```java
