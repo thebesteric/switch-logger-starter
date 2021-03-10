@@ -31,6 +31,7 @@ import java.util.LinkedHashMap;
 @Table(name = "invoke")
 public class InvokeLog extends AbstractEntity {
 
+    public static final String LEVEL_DEBUG = "DEBUG";
     public static final String LEVEL_INFO = "INFO";
     public static final String LEVEL_ERROR = "ERROR";
     public static final String LEVEL_WARN = "WARN";

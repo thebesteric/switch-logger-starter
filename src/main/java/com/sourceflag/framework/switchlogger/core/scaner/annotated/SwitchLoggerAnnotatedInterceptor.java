@@ -59,9 +59,7 @@ public class SwitchLoggerAnnotatedInterceptor implements MethodInterceptor {
                 invokeLog.setTrackId(trackId);
                 invokeLog.setException(finalException);
                 invokeLog.setExecuteInfo(new InvokeLog.ExecuteInfo(method, args, startTime, finalDurationTime));
-                if (finalException != null) {
-                    invokeLog.setLevel(InvokeLog.LEVEL_ERROR);
-                }
+                invokeLog.setLevel(finalException != null ? InvokeLog.LEVEL_ERROR : switchLoggerAnnotationInfo.getLevel());
 
                 // process log
                 for (RecordProcessor recordProcessor : recordProcessors) {
@@ -80,15 +78,16 @@ public class SwitchLoggerAnnotatedInterceptor implements MethodInterceptor {
 
     private SwitchLoggerAnnotationInfo extractSwitchLoggerAnnotationInfo(Method method) {
         SwitchLoggerAnnotationInfo.SwitchLoggerAnnotationInfoBuilder builder = SwitchLoggerAnnotationInfo.builder();
+        SwitchLogger switchLogger;
         // Check if the class contains @SwitchLogger
         if (method.getDeclaringClass().isAnnotationPresent(SwitchLogger.class)) {
-            SwitchLogger classAnnotation = method.getDeclaringClass().getDeclaredAnnotation(SwitchLogger.class);
-            builder.classTag(classAnnotation.tag()).classExtra(classAnnotation.extra());
+            switchLogger = method.getDeclaringClass().getDeclaredAnnotation(SwitchLogger.class);
+            builder.classTag(switchLogger.tag()).classExtra(switchLogger.extra()).level(switchLogger.level());
         }
         // Check if the method contains @SwitchLogger
         if (method.isAnnotationPresent(SwitchLogger.class)) {
-            SwitchLogger methodAnnotation = method.getDeclaredAnnotation(SwitchLogger.class);
-            builder.methodTag(methodAnnotation.tag()).methodExtra(methodAnnotation.extra());
+            switchLogger = method.getDeclaredAnnotation(SwitchLogger.class);
+            builder.methodTag(switchLogger.tag()).methodExtra(switchLogger.extra()).level(switchLogger.level());
         }
 
         // default tag
@@ -103,7 +102,7 @@ public class SwitchLoggerAnnotatedInterceptor implements MethodInterceptor {
     @Builder
     private static class SwitchLoggerAnnotationInfo {
 
-        private String classTag, methodTag, defaultTag;
+        private String classTag, methodTag, defaultTag, level;
         private String[] classExtra, methodExtra;
 
         // Method tag first
@@ -114,6 +113,10 @@ public class SwitchLoggerAnnotatedInterceptor implements MethodInterceptor {
         // Method extra first
         public String[] getExtra() {
             return methodExtra != null ? methodExtra : classExtra;
+        }
+
+        public String getLevel() {
+            return level;
         }
 
     }
