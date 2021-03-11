@@ -7,10 +7,7 @@ import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
@@ -35,15 +32,22 @@ public class SwitchLoggerRequestWrapper extends HttpServletRequestWrapper {
         body = temp;
     }
 
+
     private byte[] getRequestBody(HttpServletRequest request) {
         byte[] buffer = new byte[0];
+        InputStream in = null;
         int len = request.getContentLength();
         if (len > 0) {
-            buffer = new byte[len];
-            ServletInputStream in = null;
             try {
+                buffer = new byte[len];
                 in = request.getInputStream();
-                in.read(buffer, 0, len);
+                int read = 1;
+                int totalRead = 0;
+                while (read > 0) {
+                    read = in.read(buffer, totalRead, buffer.length - totalRead);
+                    if (read > 0)
+                        totalRead += read;
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
@@ -56,6 +60,7 @@ public class SwitchLoggerRequestWrapper extends HttpServletRequestWrapper {
                 }
             }
         }
+
         return buffer;
     }
 
