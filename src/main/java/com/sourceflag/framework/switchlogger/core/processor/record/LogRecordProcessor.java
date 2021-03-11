@@ -25,15 +25,18 @@ public class LogRecordProcessor extends AbstractSingleThreadRecordProcessor {
     @Override
     public void doProcess(InvokeLog invokeLog) throws JsonProcessingException {
         String jsonLog = JsonUtils.mapper.writeValueAsString(invokeLog);
-        switch (invokeLog.getLevel()) {
-            case InvokeLog.LEVEL_ERROR:
-                log.error(jsonLog);
+        switch (invokeLog.getLevel().toUpperCase()) {
+            case InvokeLog.LEVEL_INFO:
+                log.info(jsonLog);
                 break;
             case InvokeLog.LEVEL_WARN:
                 log.warn(jsonLog);
                 break;
+            case InvokeLog.LEVEL_ERROR:
+                log.error(jsonLog);
+                break;
             default:
-                log.info(jsonLog);
+                log.debug(jsonLog);
         }
     }
 }
