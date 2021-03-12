@@ -311,7 +311,7 @@ public class SwitchLoggerConfiguration {
 }
 ``` 
 
-- AbstractRequestLoggerProcessor 抽象类: 实现了 RequestLoggerProcessor 接口，简化了日志处理
+- AbstractRequestLoggerProcessor 抽象类: 继承 DefaultRequestLoggerProcessor 接口，可自定义日志处理规则
 ```java
 public class SwitchLoggerConfiguration {
     @Bean
@@ -324,6 +324,19 @@ public class SwitchLoggerConfiguration {
             }
         };
     }
+}
+```
+
+- InterfaceMetricRequestLoggerProcessor 接口统计类: 继承 AbstractRequestLoggerProcessor 类，实现了接口统计功能
+```java
+@Configuration
+public class SwitchLoggerConfiguration {
+
+    @Bean
+    public RequestLoggerProcessor requestLoggerProcessor() {
+        return new InterfaceMetricRequestLoggerProcessor();
+    }
+
 }
 ```
 

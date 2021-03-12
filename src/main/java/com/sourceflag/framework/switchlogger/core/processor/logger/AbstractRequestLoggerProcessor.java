@@ -1,7 +1,6 @@
 package com.sourceflag.framework.switchlogger.core.processor.logger;
 
 import com.sourceflag.framework.switchlogger.core.domain.RequestLog;
-import com.sourceflag.framework.switchlogger.core.processor.RequestLoggerProcessor;
 import com.sourceflag.framework.switchlogger.core.wrapper.SwitchLoggerRequestWrapper;
 import com.sourceflag.framework.switchlogger.core.wrapper.SwitchLoggerResponseWrapper;
 import lombok.extern.slf4j.Slf4j;
@@ -19,11 +18,11 @@ import java.util.Map;
  * @since 1.0
  */
 @Slf4j
-public abstract class AbstractRequestLoggerProcessor implements RequestLoggerProcessor {
+public abstract class AbstractRequestLoggerProcessor extends DefaultRequestLoggerProcessor {
 
     @Override
     public RequestLog processor(SwitchLoggerRequestWrapper requestWrapper, SwitchLoggerResponseWrapper responseWrapper, Map<String, Method> mapping, ThreadLocal<String> trackIdThreadLocal, long duration) throws IOException {
-        RequestLog requestLog = new DefaultRequestLoggerProcessor().processor(requestWrapper, responseWrapper, mapping, trackIdThreadLocal, duration);
+        RequestLog requestLog = super.processor(requestWrapper, responseWrapper, mapping, trackIdThreadLocal, duration);
         return doAfterProcessor(requestLog);
     }
 
