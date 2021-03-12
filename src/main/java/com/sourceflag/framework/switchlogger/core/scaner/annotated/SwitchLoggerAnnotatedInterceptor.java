@@ -90,8 +90,8 @@ public class SwitchLoggerAnnotatedInterceptor implements MethodInterceptor {
             builder.methodTag(switchLogger.tag()).methodExtra(switchLogger.extra()).level(switchLogger.level());
         }
 
-        // default tag
-        builder.defaultTag(StringUtils.lowerFirst(method.getDeclaringClass().getSimpleName()));
+        // default tag & level
+        builder.defaultTag(StringUtils.lowerFirst(method.getDeclaringClass().getSimpleName())).defaultLevel(SwitchLogger.Level.INFO);
 
         return builder.build();
     }
@@ -102,7 +102,7 @@ public class SwitchLoggerAnnotatedInterceptor implements MethodInterceptor {
     @Builder
     private static class SwitchLoggerAnnotationInfo {
 
-        private String classTag, methodTag, defaultTag, level;
+        private String classTag, methodTag, defaultTag, defaultLevel, level;
         private String[] classExtra, methodExtra;
 
         // Method tag first
@@ -116,7 +116,7 @@ public class SwitchLoggerAnnotatedInterceptor implements MethodInterceptor {
         }
 
         public String getLevel() {
-            return level;
+            return !StringUtils.isEmpty(level) ? level : defaultLevel;
         }
 
     }
