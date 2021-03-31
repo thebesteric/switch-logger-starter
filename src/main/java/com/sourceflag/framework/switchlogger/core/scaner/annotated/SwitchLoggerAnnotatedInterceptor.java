@@ -47,32 +47,38 @@ public class SwitchLoggerAnnotatedInterceptor implements MethodInterceptor {
             exception = throwable.getMessage();
             throw throwable;
         } finally {
-            Object finalResult = result;
-            String finalException = exception;
-            long finalDurationTime = durationTime;
-            CompletableFuture.runAsync(() -> {
-                InvokeLog invokeLog = new InvokeLog();
-                invokeLog.setCreatedTime(System.currentTimeMillis());
-                invokeLog.setTag(switchLoggerAnnotationInfo.getTag());
-                invokeLog.setExtra(switchLoggerAnnotationInfo.getExtra());
-                invokeLog.setResult(finalResult);
-                invokeLog.setTrackId(trackId);
-                invokeLog.setException(finalException);
-                invokeLog.setExecuteInfo(new InvokeLog.ExecuteInfo(method, args, startTime, finalDurationTime));
-                invokeLog.setLevel(finalException != null ? InvokeLog.LEVEL_ERROR : switchLoggerAnnotationInfo.getLevel());
+            // package log
+            InvokeLog invokeLog = new InvokeLog();
+            invokeLog.setCreatedTime(System.currentTimeMillis());
+            invokeLog.setTag(switchLoggerAnnotationInfo.getTag());
+            invokeLog.setExtra(switchLoggerAnnotationInfo.getExtra());
+            invokeLog.setResult(result);
+            invokeLog.setTrackId(trackId);
+            invokeLog.setException(exception);
+            invokeLog.setExecuteInfo(new InvokeLog.ExecuteInfo(method, args, startTime, durationTime));
+            invokeLog.setLevel(exception != null ? InvokeLog.LEVEL_ERROR : switchLoggerAnnotationInfo.getLevel());
 
-                // process log
-                for (RecordProcessor recordProcessor : recordProcessors) {
-                    try {
-                        if (recordProcessor.supports(properties.getModel())) {
-                            recordProcessor.processor(invokeLog);
-                            break;
-                        }
-                    } catch (Throwable e) {
-                        e.printStackTrace();
-                    }
+            // process log
+            if (!properties.isAsync()) {
+                execute(invokeLog);
+            } else {
+                CompletableFuture.runAsync(() -> {
+                    execute(invokeLog);
+                });
+            }
+        }
+    }
+
+    private void execute(final InvokeLog invokeLog) {
+        for (RecordProcessor recordProcessor : recordProcessors) {
+            try {
+                if (recordProcessor.supports(properties.getModel())) {
+                    recordProcessor.processor(invokeLog);
+                    break;
                 }
-            });
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
         }
     }
 

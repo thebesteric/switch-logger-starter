@@ -5,13 +5,11 @@ import com.sourceflag.framework.switchlogger.annotation.Table;
 import com.sourceflag.framework.switchlogger.configuration.SwitchLoggerProperties;
 import com.sourceflag.framework.switchlogger.core.domain.InvokeLog;
 import com.sourceflag.framework.switchlogger.core.exception.UnsupportedModelException;
-import com.sourceflag.framework.switchlogger.core.processor.RecordProcessor;
 import com.sourceflag.framework.switchlogger.core.processor.RequestLoggerProcessor;
 import com.sourceflag.framework.switchlogger.utils.JsonUtils;
 import com.sourceflag.framework.switchlogger.utils.ObjectUtils;
 import com.sourceflag.framework.switchlogger.utils.ReflectUtils;
 import com.sourceflag.framework.switchlogger.utils.SwitchJdbcTemplate;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -28,24 +26,24 @@ import java.util.List;
  * @since 1.0
  */
 @Slf4j
-@RequiredArgsConstructor
 public class DatabaseRecordProcessor extends AbstractSingleThreadRecordProcessor {
 
-    @Qualifier("switchLoggerJdbcTemplate")
+
     private final SwitchJdbcTemplate jdbcTemplate;
 
-    private final SwitchLoggerProperties properties;
-
-    private final RequestLoggerProcessor requestLoggerProcessor;
+    public DatabaseRecordProcessor(@Qualifier("switchLoggerJdbcTemplate") SwitchJdbcTemplate jdbcTemplate, SwitchLoggerProperties properties) {
+        super(properties);
+        this.jdbcTemplate = jdbcTemplate;
+    }
 
     @Override
     public boolean supports(String model) throws UnsupportedModelException {
         if (jdbcTemplate == null) {
             throw new UnsupportedModelException("MySQL Datasource is not configure");
-        } else if (requestLoggerProcessor != null) {
+        } else if (!SwitchLoggerProperties.ModelType.DATABASE.name().equalsIgnoreCase(model)) {
             throw new UnsupportedModelException("Database model is not support custom log");
         }
-        return model != null && !model.trim().equals("") && SwitchLoggerProperties.ModelType.DATABASE.name().equalsIgnoreCase(model);
+        return !model.trim().equals("") && SwitchLoggerProperties.ModelType.DATABASE.name().equalsIgnoreCase(model);
     }
 
     @Override

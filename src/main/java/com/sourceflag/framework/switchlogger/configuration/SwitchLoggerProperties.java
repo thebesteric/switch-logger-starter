@@ -23,6 +23,9 @@ public class SwitchLoggerProperties {
 
     private boolean enable = true;
 
+    // decide whether to use a thread pool
+    private boolean async = false;
+
     // support maven and gradle
     private String[] compilePath = {"target\\classes", "build\\classes\\java\\main"};
 

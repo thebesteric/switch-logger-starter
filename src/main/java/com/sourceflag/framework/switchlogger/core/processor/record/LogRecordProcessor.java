@@ -17,6 +17,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class LogRecordProcessor extends AbstractSingleThreadRecordProcessor {
 
+    public LogRecordProcessor(SwitchLoggerProperties properties) {
+        super(properties);
+    }
+
     @Override
     public boolean supports(String model) {
         return model == null || model.trim().equals("") || SwitchLoggerProperties.ModelType.LOG.name().equalsIgnoreCase(model);

@@ -197,32 +197,34 @@ public class SwitchLoggerAutoConfiguration {
 
     // byDefault
     @Bean(name = "switchLoggerLogRecordProcessor")
-    public RecordProcessor logRecordProcessor() {
-        return new LogRecordProcessor();
+    public RecordProcessor logRecordProcessor(SwitchLoggerProperties properties) {
+        return new LogRecordProcessor(properties);
     }
 
     @Bean(name = "switchLoggerStdoutRecordProcessor")
-    public RecordProcessor stdoutRecordProcessor() {
-        return new StdoutRecordProcessor();
+    public RecordProcessor stdoutRecordProcessor(SwitchLoggerProperties properties) {
+        return new StdoutRecordProcessor(properties);
     }
 
     @Bean
     @Conditional(SwitchLoggerRedisMarker.class)
-    public RecordProcessor redisRecordProcessor(@Qualifier("switchLoggerRedisTemplate") RedisTemplate<String, Object> redisTemplate, SwitchLoggerProperties properties) {
+    public RecordProcessor redisRecordProcessor(@Qualifier("switchLoggerRedisTemplate") RedisTemplate<String, Object> redisTemplate,
+                                                SwitchLoggerProperties properties) {
         return new RedisRecordProcessor(redisTemplate, properties);
     }
 
     @Bean
     @Conditional(SwitchLoggerCacheMarker.class)
-    public RecordProcessor cacheRecordProcessor(@Qualifier("switchLoggerCache") Cache<String, Object> switchLoggerCache) {
-        return new CacheRecordProcessor(switchLoggerCache);
+    public RecordProcessor cacheRecordProcessor(@Qualifier("switchLoggerCache") Cache<String, Object> switchLoggerCache,
+                                                SwitchLoggerProperties properties) {
+        return new CacheRecordProcessor(switchLoggerCache, properties);
     }
 
     @Bean
     @Conditional(SwitchLoggerDatabaseMarker.class)
-    public RecordProcessor databaseRecordProcessor(@Qualifier("switchLoggerJdbcTemplate") SwitchJdbcTemplate switchLoggerJdbcTemplate, SwitchLoggerProperties properties,
-                                                   @Nullable RequestLoggerProcessor requestLoggerProcessor) {
-        return new DatabaseRecordProcessor(switchLoggerJdbcTemplate, properties, requestLoggerProcessor);
+    public RecordProcessor databaseRecordProcessor(@Qualifier("switchLoggerJdbcTemplate") SwitchJdbcTemplate switchLoggerJdbcTemplate,
+                                                   SwitchLoggerProperties properties) {
+        return new DatabaseRecordProcessor(switchLoggerJdbcTemplate, properties);
     }
 
     @Bean(name = "switchLoggerCache")

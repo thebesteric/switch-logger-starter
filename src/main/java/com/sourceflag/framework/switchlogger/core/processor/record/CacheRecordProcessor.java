@@ -3,8 +3,6 @@ package com.sourceflag.framework.switchlogger.core.processor.record;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.sourceflag.framework.switchlogger.configuration.SwitchLoggerProperties;
 import com.sourceflag.framework.switchlogger.core.domain.InvokeLog;
-import com.sourceflag.framework.switchlogger.core.processor.RecordProcessor;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -17,11 +15,14 @@ import org.springframework.beans.factory.annotation.Qualifier;
  * @since 1.0
  */
 @Slf4j
-@RequiredArgsConstructor
 public class CacheRecordProcessor extends AbstractSingleThreadRecordProcessor {
 
-    @Qualifier("switchLoggerCache")
     private final Cache<String, Object> cache;
+
+    public CacheRecordProcessor(@Qualifier("switchLoggerCache") Cache<String, Object> cache, SwitchLoggerProperties properties) {
+        super(properties);
+        this.cache = cache;
+    }
 
     @Override
     public boolean supports(String model) {

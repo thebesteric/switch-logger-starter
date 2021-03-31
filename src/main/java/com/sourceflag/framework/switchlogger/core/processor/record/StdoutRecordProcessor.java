@@ -15,6 +15,11 @@ import com.sourceflag.framework.switchlogger.utils.JsonUtils;
  * @since 1.0
  */
 public class StdoutRecordProcessor extends AbstractSingleThreadRecordProcessor {
+
+    public StdoutRecordProcessor(SwitchLoggerProperties properties) {
+        super(properties);
+    }
+
     @Override
     public boolean supports(String model) throws UnsupportedModelException {
         return model != null && !model.trim().equals("") && SwitchLoggerProperties.ModelType.STDOUT.name().equalsIgnoreCase(model);

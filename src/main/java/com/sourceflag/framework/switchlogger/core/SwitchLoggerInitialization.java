@@ -83,7 +83,7 @@ public class SwitchLoggerInitialization implements SmartLifecycle, ApplicationCo
             }
         }
 
-        log.info("Switch Logger Record Model is {}", model.toUpperCase());
+        log.info("Switch Logger Record Model is {}, Running Model is {}", model, properties.isAsync() ? "Async" : "Sync");
 
         String projectPath = getProjectPath();
         // scanner @Controller and @SwitchLogger and so on

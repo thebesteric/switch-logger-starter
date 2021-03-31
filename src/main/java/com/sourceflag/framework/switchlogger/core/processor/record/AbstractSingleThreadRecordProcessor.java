@@ -1,7 +1,9 @@
 package com.sourceflag.framework.switchlogger.core.processor.record;
 
+import com.sourceflag.framework.switchlogger.configuration.SwitchLoggerProperties;
 import com.sourceflag.framework.switchlogger.core.domain.InvokeLog;
 import com.sourceflag.framework.switchlogger.core.processor.RecordProcessor;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 
 import java.util.concurrent.ExecutorService;
@@ -19,19 +21,36 @@ import java.util.concurrent.TimeUnit;
  */
 public abstract class AbstractSingleThreadRecordProcessor implements RecordProcessor {
 
-    private final ExecutorService pool = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
-            new LinkedBlockingQueue<>(1024), new BasicThreadFactory.Builder().namingPattern("switch-logger-record-pool-%d").daemon(true).build(),
-            new ThreadPoolExecutor.CallerRunsPolicy());
+    protected final SwitchLoggerProperties properties;
+
+    private ExecutorService pool;
+
+    public AbstractSingleThreadRecordProcessor(SwitchLoggerProperties properties) {
+        this.properties = properties;
+        if (properties.isAsync()) {
+            this.pool = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
+                    new LinkedBlockingQueue<>(1024), new BasicThreadFactory.Builder().namingPattern("switch-logger-record-pool-%d").daemon(true).build(),
+                    new ThreadPoolExecutor.CallerRunsPolicy());
+        }
+    }
 
     @Override
     public void processor(InvokeLog invokeLog) throws Throwable {
-        pool.execute(() -> {
-            try {
-                doProcess(invokeLog);
-            } catch (Throwable throwable) {
-                throwable.printStackTrace();
-            }
-        });
+        if (pool != null) {
+            pool.execute(() -> {
+                doExecute(invokeLog);
+            });
+        } else {
+            doExecute(invokeLog);
+        }
+    }
+
+    private void doExecute(InvokeLog invokeLog) {
+        try {
+            doProcess(invokeLog);
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+        }
     }
 
     public abstract void doProcess(InvokeLog invokeLog) throws Throwable;
