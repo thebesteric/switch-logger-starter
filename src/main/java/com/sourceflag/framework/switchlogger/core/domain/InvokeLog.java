@@ -31,9 +31,10 @@ import java.util.LinkedHashMap;
 @Table(name = "invoke")
 public class InvokeLog extends AbstractEntity {
 
-    public enum Level {
-        DEBUG, INFO, WARN, ERROR
-    }
+    public static final String LEVEL_DEBUG = "DEBUG";
+    public static final String LEVEL_INFO = "INFO";
+    public static final String LEVEL_ERROR = "ERROR";
+    public static final String LEVEL_WARN = "WARN";
 
     public static final String DEFAULT_TAG = "default";
 
@@ -41,7 +42,7 @@ public class InvokeLog extends AbstractEntity {
     protected String tag = DEFAULT_TAG;
 
     @Column(length = 64)
-    protected String level = Level.INFO.name();
+    protected String level = LEVEL_INFO;
 
     /** to tracking controller -> method_1 -> method_2 -> ... 's link */
     @JsonProperty("track_id")
@@ -142,7 +143,7 @@ public class InvokeLog extends AbstractEntity {
     public static class Builder {
 
         private String tag = DEFAULT_TAG;
-        private String level = Level.INFO.name();
+        private String level = LEVEL_INFO;
         private String trackId;
         private long createdTime = System.currentTimeMillis();
         private ExecuteInfo executeInfo;
@@ -156,11 +157,6 @@ public class InvokeLog extends AbstractEntity {
 
         public Builder setTag(String tag) {
             this.tag = tag;
-            return this;
-        }
-
-        public Builder setLevel(Level level) {
-            this.level = level.name();
             return this;
         }
 

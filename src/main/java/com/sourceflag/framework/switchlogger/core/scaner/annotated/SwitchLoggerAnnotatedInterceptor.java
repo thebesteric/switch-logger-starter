@@ -56,7 +56,7 @@ public class SwitchLoggerAnnotatedInterceptor implements MethodInterceptor {
                     .setTrackId(trackId)
                     .setException(exception)
                     .setExecuteInfo(new InvokeLog.ExecuteInfo(method, args, startTime, durationTime))
-                    .setLevel(exception != null ? InvokeLog.Level.ERROR.name() : switchLoggerAnnotationInfo.getLevel())
+                    .setLevel(exception != null ? InvokeLog.LEVEL_ERROR : switchLoggerAnnotationInfo.getLevel())
                     .build();
 
             // process log

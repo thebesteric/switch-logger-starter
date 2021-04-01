@@ -20,7 +20,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
 /**
@@ -83,7 +82,7 @@ public class SwitchLoggerFilter extends SwitchLoggerFilterWrapper {
             filterChain.doFilter(requestWrapper, responseWrapper);
         } catch (Exception ex) {
             ex.printStackTrace();
-            responseWrapper.setLevel(InvokeLog.Level.ERROR.name());
+            responseWrapper.setLevel(InvokeLog.LEVEL_ERROR);
             responseWrapper.setException(ex);
             responseWrapper.setBuffer(ex.getMessage());
         }

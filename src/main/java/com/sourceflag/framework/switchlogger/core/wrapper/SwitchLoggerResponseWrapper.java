@@ -1,7 +1,6 @@
 package com.sourceflag.framework.switchlogger.core.wrapper;
 
 import com.sourceflag.framework.switchlogger.core.domain.InvokeLog;
-import com.sourceflag.framework.switchlogger.core.domain.RequestLog;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -27,7 +26,7 @@ public class SwitchLoggerResponseWrapper extends HttpServletResponseWrapper {
 
     @Getter
     @Setter
-    private String level = InvokeLog.Level.INFO.name();
+    private String level = InvokeLog.LEVEL_INFO;
 
     @Getter
     @Setter
@@ -61,7 +60,7 @@ public class SwitchLoggerResponseWrapper extends HttpServletResponseWrapper {
 
     private static class WrapperOutputStream extends ServletOutputStream {
 
-        private ByteArrayOutputStream byteArrayOutputStream;
+        private final ByteArrayOutputStream byteArrayOutputStream;
 
         public WrapperOutputStream(ByteArrayOutputStream byteArrayOutputStream) {
             this.byteArrayOutputStream = byteArrayOutputStream;
