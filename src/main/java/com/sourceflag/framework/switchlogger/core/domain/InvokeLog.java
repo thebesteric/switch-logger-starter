@@ -31,10 +31,9 @@ import java.util.LinkedHashMap;
 @Table(name = "invoke")
 public class InvokeLog extends AbstractEntity {
 
-    public static final String LEVEL_DEBUG = "DEBUG";
-    public static final String LEVEL_INFO = "INFO";
-    public static final String LEVEL_ERROR = "ERROR";
-    public static final String LEVEL_WARN = "WARN";
+    public enum Level {
+        DEBUG, INFO, WARN, ERROR
+    }
 
     public static final String DEFAULT_TAG = "default";
 
@@ -42,7 +41,7 @@ public class InvokeLog extends AbstractEntity {
     protected String tag = DEFAULT_TAG;
 
     @Column(length = 64)
-    protected String level = LEVEL_INFO;
+    protected String level = Level.INFO.name();
 
     /** to tracking controller -> method_1 -> method_2 -> ... 's link */
     @JsonProperty("track_id")
@@ -65,6 +64,17 @@ public class InvokeLog extends AbstractEntity {
 
     @Column(type = "json")
     protected Object extra;
+
+    public InvokeLog(Builder builder) {
+        this.tag = builder.getTag();
+        this.level = builder.getLevel();
+        this.trackId = builder.getTrackId();
+        this.createdTime = builder.getCreatedTime();
+        this.executeInfo = builder.getExecuteInfo();
+        this.result = builder.getResult();
+        this.exception = builder.getException();
+        this.extra = builder.getExtra();
+    }
 
     @Getter
     @Setter
@@ -126,6 +136,68 @@ public class InvokeLog extends AbstractEntity {
             }
         }
 
+    }
+
+    @Getter
+    public static class Builder {
+
+        private String tag = DEFAULT_TAG;
+        private String level = Level.INFO.name();
+        private String trackId;
+        private long createdTime = System.currentTimeMillis();
+        private ExecuteInfo executeInfo;
+        private Object result;
+        private String exception;
+        private Object extra;
+
+        public InvokeLog build() {
+            return new InvokeLog(this);
+        }
+
+        public Builder setTag(String tag) {
+            this.tag = tag;
+            return this;
+        }
+
+        public Builder setLevel(Level level) {
+            this.level = level.name();
+            return this;
+        }
+
+        public Builder setLevel(String level) {
+            this.level = level;
+            return this;
+        }
+
+        public Builder setTrackId(String trackId) {
+            this.trackId = trackId;
+            return this;
+        }
+
+        public Builder setCreatedTime(long createdTime) {
+            this.createdTime = createdTime;
+            return this;
+        }
+
+        public Builder setExecuteInfo(ExecuteInfo executeInfo) {
+            this.executeInfo = executeInfo;
+            return this;
+        }
+
+        public Builder setResult(Object result) {
+            this.result = result;
+            return this;
+        }
+
+        public Builder setException(String exception) {
+            this.exception = exception;
+            return this;
+        }
+
+        public Builder setExtra(Object extra) {
+            this.extra = extra;
+            return this;
+        }
     }
 
 

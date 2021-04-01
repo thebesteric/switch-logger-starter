@@ -1,6 +1,5 @@
 package com.sourceflag.framework.switchlogger.annotation;
 
-import com.sourceflag.framework.switchlogger.core.domain.InvokeLog;
 import org.springframework.core.annotation.AliasFor;
 
 import java.lang.annotation.*;
@@ -21,8 +20,8 @@ public @interface SwitchLogger {
     String[] extra() default "";
 
     final class Level {
-        public static final String INFO = InvokeLog.LEVEL_INFO;
-        public static final String DEBUG = InvokeLog.LEVEL_DEBUG;
+        public static final String INFO = "INFO";
+        public static final String DEBUG = "DEBUG";
     }
 
 }

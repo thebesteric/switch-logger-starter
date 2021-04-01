@@ -48,23 +48,22 @@ public class SwitchLoggerAnnotatedInterceptor implements MethodInterceptor {
             throw throwable;
         } finally {
             // package log
-            InvokeLog invokeLog = new InvokeLog();
-            invokeLog.setCreatedTime(System.currentTimeMillis());
-            invokeLog.setTag(switchLoggerAnnotationInfo.getTag());
-            invokeLog.setExtra(switchLoggerAnnotationInfo.getExtra());
-            invokeLog.setResult(result);
-            invokeLog.setTrackId(trackId);
-            invokeLog.setException(exception);
-            invokeLog.setExecuteInfo(new InvokeLog.ExecuteInfo(method, args, startTime, durationTime));
-            invokeLog.setLevel(exception != null ? InvokeLog.LEVEL_ERROR : switchLoggerAnnotationInfo.getLevel());
+            InvokeLog invokeLog = new InvokeLog.Builder()
+                    .setCreatedTime(System.currentTimeMillis())
+                    .setTag(switchLoggerAnnotationInfo.getTag())
+                    .setExtra(switchLoggerAnnotationInfo.getExtra())
+                    .setResult(result)
+                    .setTrackId(trackId)
+                    .setException(exception)
+                    .setExecuteInfo(new InvokeLog.ExecuteInfo(method, args, startTime, durationTime))
+                    .setLevel(exception != null ? InvokeLog.Level.ERROR.name() : switchLoggerAnnotationInfo.getLevel())
+                    .build();
 
             // process log
             if (!properties.isAsync()) {
                 execute(invokeLog);
             } else {
-                CompletableFuture.runAsync(() -> {
-                    execute(invokeLog);
-                });
+                CompletableFuture.runAsync(() -> execute(invokeLog));
             }
         }
     }

@@ -1,5 +1,6 @@
 package com.sourceflag.framework.switchlogger.core.wrapper;
 
+import com.sourceflag.framework.switchlogger.core.domain.InvokeLog;
 import com.sourceflag.framework.switchlogger.core.domain.RequestLog;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,12 +22,12 @@ import java.io.IOException;
  */
 public class SwitchLoggerResponseWrapper extends HttpServletResponseWrapper {
 
-    private ByteArrayOutputStream buffer;
-    private ServletOutputStream out;
+    private final ByteArrayOutputStream buffer;
+    private final ServletOutputStream out;
 
     @Getter
     @Setter
-    private String level = RequestLog.LEVEL_INFO;
+    private String level = InvokeLog.Level.INFO.name();
 
     @Getter
     @Setter
