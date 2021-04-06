@@ -18,6 +18,7 @@ public class JsonUtils {
     public static ObjectMapper mapper = new ObjectMapper()
             .configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true)
             .configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true)
-            .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+            .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+            .configure(SerializationFeature.FAIL_ON_SELF_REFERENCES, false);
 
 }
