@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public abstract class SwitchLoggerFilterWrapper implements Filter {
 
-    public static final Map<String, Method> URL_MAPPING = new ConcurrentHashMap<>(16);
+    public static final Map<String, Method> URL_MAPPING = new ConcurrentHashMap<>(128);
 
     public static final ThreadLocal<String> trackIdThreadLocal = TransactionUtils.create();
 

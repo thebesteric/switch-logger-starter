@@ -31,7 +31,7 @@ public interface MappingProcessor {
     void processor(String[] classRequestMappingUrl);
 
 
-    default void doProcessor(String[] methodRequestMappingUrls, String classRequestMappingUrl, Method method) {
+    default void doProcessor(String classRequestMappingUrl, String[] methodRequestMappingUrls, Method method) {
         if (methodRequestMappingUrls.length == 0) {
             SwitchLoggerFilterWrapper.URL_MAPPING.put(classRequestMappingUrl, method);
             if (!classRequestMappingUrl.endsWith("/")) {

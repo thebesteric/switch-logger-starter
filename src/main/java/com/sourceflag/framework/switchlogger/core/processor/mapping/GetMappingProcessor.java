@@ -28,7 +28,7 @@ public class GetMappingProcessor implements MappingProcessor {
         if (classRequestMappingUrls != null && classRequestMappingUrls.length > 0) {
             for (String classRequestMappingUrl : classRequestMappingUrls) {
                 String[] methodRequestMappingUrls = method.getAnnotation(GetMapping.class).value();
-                doProcessor(methodRequestMappingUrls, classRequestMappingUrl, method);
+                doProcessor(classRequestMappingUrl, methodRequestMappingUrls, method);
             }
         }
     }

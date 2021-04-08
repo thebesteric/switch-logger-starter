@@ -21,7 +21,7 @@ public class SwitchLoggerControllerScanner implements SwitchLoggerScanner {
 
     private final List<MappingProcessor> mappingProcessors;
 
-    public SwitchLoggerControllerScanner(List<MappingProcessor> mappingProcessors){
+    public SwitchLoggerControllerScanner(List<MappingProcessor> mappingProcessors) {
         this.mappingProcessors = mappingProcessors;
     }
 
@@ -34,6 +34,8 @@ public class SwitchLoggerControllerScanner implements SwitchLoggerScanner {
                 String[] classRequestMappingUrls = null;
                 if (classRequestMapping != null) {
                     classRequestMappingUrls = classRequestMapping.value();
+                } else {
+                    classRequestMappingUrls = new String[]{""};
                 }
                 for (Method method : clazz.getDeclaredMethods()) {
                     for (MappingProcessor mappingProcessor : mappingProcessors) {

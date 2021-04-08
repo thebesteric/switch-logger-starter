@@ -82,13 +82,6 @@ public class InvokeLog extends AbstractEntity {
     @NoArgsConstructor
     public static class ExecuteInfo extends AbstractEntity {
 
-        public ExecuteInfo(Method method, Object[] args, long startTime, long duration) {
-            this.className = method.getDeclaringClass().getName();
-            this.methodInfo = new MethodInfo(method, args);
-            this.startTime = startTime;
-            this.duration = duration;
-        }
-
         private String className;
 
         private MethodInfo methodInfo;
@@ -98,15 +91,22 @@ public class InvokeLog extends AbstractEntity {
 
         private long duration;
 
+        public ExecuteInfo(Method method, Object[] args, long startTime, long duration) {
+            this.className = method.getDeclaringClass().getName();
+            this.methodInfo = new MethodInfo(method, args);
+            this.startTime = startTime;
+            this.duration = duration;
+        }
+
         @Getter
         @Setter
         @NoArgsConstructor
         public static class MethodInfo extends AbstractEntity {
 
             private String methodName;
+            private String returnType;
             private LinkedHashMap<String, Object> signatures = new LinkedHashMap<>();
             private LinkedHashMap<String, Object> arguments = new LinkedHashMap<>();
-            private String returnType;
 
             public MethodInfo(Method method, Object[] args) {
                 this.methodName = method.getName();
