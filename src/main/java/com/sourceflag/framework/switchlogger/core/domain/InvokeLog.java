@@ -119,7 +119,7 @@ public class InvokeLog extends AbstractEntity {
                             if (simplicityInTreatment(param)) {
                                 arguments.put(param.getName(), param.getParameterizedType().getTypeName());
                             } else {
-                                arguments.put(param.getName(), args[i]);
+                                arguments.put(param.getName(), String.valueOf(args[i]));
                             }
                         }
                     }
