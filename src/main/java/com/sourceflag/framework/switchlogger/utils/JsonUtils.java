@@ -1,5 +1,6 @@
 package com.sourceflag.framework.switchlogger.utils;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,6 +20,7 @@ public class JsonUtils {
             .configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true)
             .configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true)
             .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
-            .configure(SerializationFeature.FAIL_ON_SELF_REFERENCES, false);
+            .configure(SerializationFeature.FAIL_ON_SELF_REFERENCES, false)
+            .setSerializationInclusion(JsonInclude.Include.ALWAYS);
 
 }
