@@ -2,7 +2,9 @@ package com.sourceflag.framework.switchlogger.core.domain;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sourceflag.framework.switchlogger.annotation.Column;
+import com.sourceflag.framework.switchlogger.annotation.IgnoreParam;
 import com.sourceflag.framework.switchlogger.annotation.Table;
+import com.sourceflag.framework.switchlogger.utils.StringUtils;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -114,7 +116,22 @@ public class InvokeLog extends AbstractEntity {
                 if (params != null && params.length > 0) {
                     for (int i = 0; i < params.length; i++) {
                         Parameter param = params[i];
+
+                        // Processing IgnoreParam
+                        IgnoreParam ignoreParam = param.getAnnotation(IgnoreParam.class);
+                        if (ignoreParam != null) {
+                            String ignoreParamValue = ignoreParam.value();
+                            if (!StringUtils.isEmpty(ignoreParamValue)) {
+                                signatures.put(param.getName(), param.getParameterizedType().getTypeName());
+                                arguments.put(param.getName(), ignoreParamValue);
+                            }
+                            continue;
+                        }
+
+                        // Add signatures
                         signatures.put(param.getName(), param.getParameterizedType().getTypeName());
+
+                        // Processing args
                         if (args != null) {
                             if (simplicityInTreatment(param)) {
                                 arguments.put(param.getName(), param.getParameterizedType().getTypeName());

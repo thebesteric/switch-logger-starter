@@ -112,6 +112,7 @@ public class SwitchLoggerAnnotatedEnhancer implements BeanPostProcessor {
 
         // 2. Deal the has argument constructor
         if (object == null) {
+            // TODO constructors maybe sort by parameters
             for (Constructor<?> constructor : originClass.getDeclaredConstructors()) {
                 Parameter[] parameters = constructor.getParameters();
                 if (parameters.length != 0) {
@@ -167,6 +168,16 @@ public class SwitchLoggerAnnotatedEnhancer implements BeanPostProcessor {
         } while (currentClass != null);
     }
 
+    /**
+     * injectAttributes
+     * <p>
+     * eg. @Autowired, @Resource, @Value
+     *
+     * @param declaredFields declaredFields
+     * @param proxyObject    proxyObject
+     * @author Eric
+     * @date 2021/1/14 23:45
+     */
     private void injectAttributes(Field[] declaredFields, Object proxyObject) {
         for (Field declaredField : declaredFields) {
             boolean isFinal = ReflectUtils.isFinal(declaredField);
