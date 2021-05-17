@@ -198,7 +198,7 @@ sourceflag.switch-logger:
     model: database
     database:
       tableName: SWITCH_LOGGER # table prefix
-      url: "jdbc:mysql://localhost:3306/test"
+      url: "jdbc:mysql://127.0.0.1:3306/test?useUnicode=true&characterEncoding=UTF-8&userSSL=false&serverTimezone=Asia/Shanghai"
       driverClassName: "com.mysql.cj.jdbc.Driver"
       username: "root"
       password: "root"
@@ -393,4 +393,19 @@ public class UserService {
 > `TrackId` 主要用于我们在进行多层链路调用时的唯一标识  
 > 如果我们在 header 中指定了上述的其中一种，则框架默认会使用我们自定义的值，否则框架会自动生成一个 UUID 作为 trackId 的值
 
-- 项目中可以使用 `TransactionUtils.get()` 来获取`trackId`
+> 项目中可以使用 `TransactionUtils.get()` 来获取`trackId` 
+
+
+- 关于 @IgnoreParam
+
+`@IgnoreParam` 注解，用来标记在 Controller 方法上的指定参数上，用来忽略相关参数
+
+> 当使用了 `@IgnoreParam` 注解后，日志将不会记录真实值，只会按照指定的字符串记录
+```java
+public class RegisterController {
+    @PostMapping("/register")
+    public Object register(@RequestParam @IgnoreParam("******") String mobile) {
+        return "success";
+    }
+}
+```
