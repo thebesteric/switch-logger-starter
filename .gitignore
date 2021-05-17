@@ -27,3 +27,6 @@ hs_err_pid*
 /target/
 /TODO.md
 /.idea/
+/switch-logger-core/target/
+/switch-logger-redis/target/
+/switch-logger-mysql/target/
