@@ -9,11 +9,9 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.sourceflag.framework.switchlogger.configuration.SwitchLoggerProperties;
 import com.sourceflag.framework.switchlogger.core.processor.RecordProcessor;
 import com.sourceflag.framework.switchlogger.redis.configuration.mark.SwitchLoggerRedisMarker;
-import com.sourceflag.framework.switchlogger.redis.controller.SwitchLoggerController;
 import com.sourceflag.framework.switchlogger.redis.record.RedisRecordProcessor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
@@ -70,10 +68,5 @@ public class SwitchLoggerRedisAutoConfiguration {
     public RecordProcessor redisRecordProcessor(@Qualifier("switchLoggerRedisTemplate") RedisTemplate<String, Object> redisTemplate,
                                                 SwitchLoggerProperties properties) {
         return new RedisRecordProcessor(redisTemplate, properties);
-    }
-
-    @Bean
-    public SwitchLoggerController switchLoggerController(ApplicationContext context) {
-        return new SwitchLoggerController(context);
     }
 }
