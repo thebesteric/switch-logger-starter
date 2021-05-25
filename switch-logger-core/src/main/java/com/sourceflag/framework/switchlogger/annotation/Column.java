@@ -3,8 +3,8 @@ package com.sourceflag.framework.switchlogger.annotation;
 import java.lang.annotation.*;
 
 @Target({ElementType.METHOD, ElementType.FIELD})
-@Inherited
 @Retention(RetentionPolicy.RUNTIME)
+@Documented
 public @interface Column {
 
     String name() default "";
