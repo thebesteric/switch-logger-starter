@@ -20,7 +20,7 @@
     <dependencies>
 
         <dependency>
-            <groupId>com.sourceflag.framework.switchlogger</groupId>
+            <groupId>io.github.thebesteric.framework.switchlogger</groupId>
             <artifactId>switch-logger-core</artifactId>
             <version>${project.version}</version>
         </dependency>

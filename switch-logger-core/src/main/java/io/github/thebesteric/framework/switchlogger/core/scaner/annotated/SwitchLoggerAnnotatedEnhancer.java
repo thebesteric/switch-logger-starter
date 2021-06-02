@@ -6,6 +6,7 @@ import io.github.thebesteric.framework.switchlogger.core.processor.AttributeProc
 import io.github.thebesteric.framework.switchlogger.core.processor.RecordProcessor;
 import io.github.thebesteric.framework.switchlogger.utils.ReflectUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -31,6 +32,7 @@ import java.util.List;
  * @since 1.0
  */
 @RequiredArgsConstructor
+@Slf4j
 public class SwitchLoggerAnnotatedEnhancer implements BeanPostProcessor {
 
     private static final String SPRING_CGLIB_SEPARATOR = "$$";
@@ -133,13 +135,39 @@ public class SwitchLoggerAnnotatedEnhancer implements BeanPostProcessor {
 
         if (object != null) {
             // Begin processing legal properties of the class
-            handleAttributes(originClass, object);
-            beanFactory.registerSingleton(beanName, object);
+            // handleAttributes(originClass, object);
+            beanFactory.registerSingleton(beanName, copyProperties(originClass, bean, object));
         }
 
         // TODO maybe has problem
         // return object == null ? bean : object;
         return bean;
+    }
+
+    /**
+     * 属性拷贝
+     *
+     * @param originClass 原始类
+     * @param source      原始对象
+     * @param target      代理对象
+     * @return java.lang.Object
+     * @author Eric
+     * @date 2021/5/26 17:57
+     */
+    private synchronized Object copyProperties(Class<?> originClass, Object source, Object target) {
+        Class<?> currentClass = originClass;
+        do {
+            for (Field sourceField : currentClass.getDeclaredFields()) {
+                sourceField.setAccessible(true);
+                try {
+                    sourceField.set(target, sourceField.get(source));
+                } catch (Exception ex) {
+                    log.debug(ex.getMessage());
+                }
+            }
+            currentClass = currentClass.getSuperclass();
+        } while (currentClass != null && currentClass != Object.class);
+        return target;
     }
 
     /**
