@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  com.sourceflag.framework.switchlogger.redis.configuration.SwitchLoggerRedisAutoConfiguration
+  io.github.thebesteric.framework.switchlogger.redis.configuration.SwitchLoggerRedisAutoConfiguration

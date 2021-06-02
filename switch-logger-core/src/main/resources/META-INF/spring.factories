@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  com.sourceflag.framework.switchlogger.configuration.SwitchLoggerAutoConfiguration
+  io.github.thebesteric.framework.switchlogger.configuration.SwitchLoggerAutoConfiguration

@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  com.sourceflag.framework.switchlogger.db.mysql.configuration.SwitchLoggerMySQLAutoConfiguration
+  io.github.thebesteric.framework.switchlogger.db.mysql.configuration.SwitchLoggerMySQLAutoConfiguration
