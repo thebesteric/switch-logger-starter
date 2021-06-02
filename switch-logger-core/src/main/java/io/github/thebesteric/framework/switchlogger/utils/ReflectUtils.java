@@ -1,10 +1,9 @@
 package io.github.thebesteric.framework.switchlogger.utils;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -104,5 +103,28 @@ public class ReflectUtils {
         }
         return false;
     }
+
+    public static Constructor<?> determineConstructor(Class<?> clazz) {
+        Constructor<?>[] rawCandidates = clazz.getDeclaredConstructors();
+        List<Constructor<?>> constructors = Arrays.asList(rawCandidates);
+        constructors.sort((o1, o2) -> {
+            if (o1.getParameterCount() != o2.getParameterCount()) {
+                return o1.getParameterCount() > o2.getParameterCount() ? 1 : -1;
+            }
+            return 0;
+        });
+        return constructors.get(0);
+    }
+
+    public static Object newInstance(Constructor<?> constructor) throws Throwable {
+        constructor.setAccessible(true);
+        Parameter[] parameters = constructor.getParameters();
+        Object[] args = new Object[parameters.length];
+        for (int i = 0; i < args.length; i++) {
+            args[i] = ObjectUtils.initialValue(parameters[i].getType());
+        }
+        return constructor.newInstance(args);
+    }
+
 
 }
