@@ -8,7 +8,7 @@
     <groupId>io.github.thebesteric.framework.switchlogger</groupId>
     <artifactId>switch-logger-starter</artifactId>
     <packaging>pom</packaging>
-    <version>0.0.1</version>
+    <version>0.0.2</version>
 
     <name>switchlogger starter</name>
     <url>https://github.com/thebesteric/switch-logger-starter</url>
