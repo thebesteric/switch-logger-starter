@@ -232,6 +232,15 @@ sourceflag.switch-logger:
       include: [".*"]
       exclude: []
 ```
+- GlobalResponse 全局异常处理机制
+```yaml
+sourceflag:
+  switch-logger:
+    global-response:
+      code-field: code
+      succeed-code: 200
+      message-field: message
+```
 
 ### 扩展
 - MappingProcessor 接口: 可自定义接口扫描规则
@@ -331,12 +340,10 @@ public class SwitchLoggerConfiguration {
 ```java
 @Configuration
 public class SwitchLoggerConfiguration {
-
     @Bean
     public RequestLoggerProcessor requestLoggerProcessor() {
         return new InterfaceMetricRequestLoggerProcessor();
     }
-
 }
 ```
 
@@ -358,6 +365,19 @@ public class SwitchLoggerConfiguration {
                 // some logic
             }
         };
+    }
+}
+```
+
+- GlobalResponseProcessor 接口：自定义全局异常处理
+> 当项目自定义全局异常处理器后，可能 SwitchLogger 就无法捕捉到异常了，此时可以扩展此接口，指明异常判断方式
+```java
+@Configuration
+public class SwitchLoggerConfiguration {
+    @Bean
+    public GlobalResponseProcessor globalResponseProcessor() {
+        // result 为程序返回结果
+        return result -> "has some error in it";
     }
 }
 ```
