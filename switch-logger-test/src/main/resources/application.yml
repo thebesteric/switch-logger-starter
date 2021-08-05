@@ -1,0 +1,6 @@
+sourceflag:
+  switch-logger:
+    global-response:
+      code-field: code
+      succeed-code: 200
+      message-field: msg
