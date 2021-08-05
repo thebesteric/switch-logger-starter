@@ -3,6 +3,7 @@ package io.github.thebesteric.framework.switchlogger.core.scaner.annotated;
 import io.github.thebesteric.framework.switchlogger.annotation.SwitchLogger;
 import io.github.thebesteric.framework.switchlogger.configuration.SwitchLoggerProperties;
 import io.github.thebesteric.framework.switchlogger.core.processor.AttributeProcessor;
+import io.github.thebesteric.framework.switchlogger.core.processor.GlobalResponseProcessor;
 import io.github.thebesteric.framework.switchlogger.core.processor.RecordProcessor;
 import io.github.thebesteric.framework.switchlogger.utils.ReflectUtils;
 import lombok.RequiredArgsConstructor;
@@ -43,6 +44,7 @@ public class SwitchLoggerAnnotatedEnhancer implements BeanPostProcessor {
     private final SwitchLoggerProperties properties;
     private final List<RecordProcessor> recordProcessors;
     private final List<AttributeProcessor> attributeProcessors;
+    private final GlobalResponseProcessor globalResponseProcessor;
 
     @Override
     public Object postProcessAfterInitialization(@NonNull Object bean, @NonNull String beanName) throws BeansException {
@@ -62,7 +64,8 @@ public class SwitchLoggerAnnotatedEnhancer implements BeanPostProcessor {
             // if Class has @SwitchLogger
             if (originClass.isAnnotationPresent(SwitchLogger.class)) {
                 if (checkLegal(originClass)) {
-                    return enhancer(originClass, new SwitchLoggerAnnotatedInterceptor(properties, recordProcessors), beanName, bean);
+                    return enhancer(originClass,
+                            new SwitchLoggerAnnotatedInterceptor(properties, recordProcessors, globalResponseProcessor), beanName, bean);
                 }
             }
 
@@ -70,7 +73,8 @@ public class SwitchLoggerAnnotatedEnhancer implements BeanPostProcessor {
             for (Method declaredMethod : beanClass.getDeclaredMethods()) {
                 if (declaredMethod.isAnnotationPresent(SwitchLogger.class)) {
                     if (checkLegal(declaredMethod)) {
-                        return enhancer(originClass, new SwitchLoggerAnnotatedInterceptor(properties, recordProcessors), beanName, bean);
+                        return enhancer(originClass,
+                                new SwitchLoggerAnnotatedInterceptor(properties, recordProcessors, globalResponseProcessor), beanName, bean);
                     }
                 }
             }

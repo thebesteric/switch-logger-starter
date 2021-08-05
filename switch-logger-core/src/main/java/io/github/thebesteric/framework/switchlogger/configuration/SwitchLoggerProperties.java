@@ -23,12 +23,16 @@ public class SwitchLoggerProperties {
 
     private boolean enable = true;
 
+    // if global exception handling is used
+    private GlobalResponse globalResponse = new GlobalResponse();
+
     // decide whether to use a thread pool
     private boolean async = false;
 
     // support maven and gradle
     private String[] compilePath = {"target\\classes", "build\\classes\\java\\main"};
 
+    // LOG, STDOUT, CACHE, REDIS, ES, DATABASE
     private String model = ModelType.LOG.name();
 
     private Redis redis = new Redis();
@@ -38,6 +42,13 @@ public class SwitchLoggerProperties {
     private Cache cache = new Cache();
 
     private Filter filter = new Filter();
+
+    @Data
+    public static class GlobalResponse {
+        private String codeField = "code";
+        private String messageField = "message";
+        private Integer succeedCode = 200;
+    }
 
     @Data
     public static class Filter {

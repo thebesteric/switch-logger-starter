@@ -3,6 +3,7 @@ package io.github.thebesteric.framework.switchlogger.core.scaner.annotated;
 import io.github.thebesteric.framework.switchlogger.annotation.SwitchLogger;
 import io.github.thebesteric.framework.switchlogger.configuration.SwitchLoggerProperties;
 import io.github.thebesteric.framework.switchlogger.core.domain.InvokeLog;
+import io.github.thebesteric.framework.switchlogger.core.processor.GlobalResponseProcessor;
 import io.github.thebesteric.framework.switchlogger.core.processor.RecordProcessor;
 import io.github.thebesteric.framework.switchlogger.core.wrapper.SwitchLoggerFilterWrapper;
 import io.github.thebesteric.framework.switchlogger.utils.StringUtils;
@@ -30,6 +31,7 @@ public class SwitchLoggerAnnotatedInterceptor implements MethodInterceptor {
 
     private final SwitchLoggerProperties properties;
     private final List<RecordProcessor> recordProcessors;
+    private final GlobalResponseProcessor globalResponseProcessor;
 
     @Override
     public Object intercept(Object obj, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
@@ -37,16 +39,16 @@ public class SwitchLoggerAnnotatedInterceptor implements MethodInterceptor {
         SwitchLoggerAnnotationInfo switchLoggerAnnotationInfo = extractSwitchLoggerAnnotationInfo(method);
         String exception = null;
         Object result = null;
-        long startTime = System.currentTimeMillis(), durationTime = 0;
+        long startTime = System.currentTimeMillis(), durationTime;
         try {
             result = methodProxy.invokeSuper(obj, args);
-            durationTime = System.currentTimeMillis() - startTime;
+            exception = globalResponseProcessor.processor(result);
             return result;
         } catch (Throwable throwable) {
-            durationTime = System.currentTimeMillis() - startTime;
             exception = throwable.getMessage();
             throw throwable;
         } finally {
+            durationTime = System.currentTimeMillis() - startTime;
             // package log
             InvokeLog invokeLog = new InvokeLog.Builder()
                     .setCreatedTime(System.currentTimeMillis())

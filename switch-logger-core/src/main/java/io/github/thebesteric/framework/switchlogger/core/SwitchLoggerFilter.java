@@ -3,6 +3,7 @@ package io.github.thebesteric.framework.switchlogger.core;
 import io.github.thebesteric.framework.switchlogger.configuration.SwitchLoggerProperties;
 import io.github.thebesteric.framework.switchlogger.core.domain.InvokeLog;
 import io.github.thebesteric.framework.switchlogger.core.domain.RequestLog;
+import io.github.thebesteric.framework.switchlogger.core.processor.GlobalResponseProcessor;
 import io.github.thebesteric.framework.switchlogger.core.processor.IgnoreUrlProcessor;
 import io.github.thebesteric.framework.switchlogger.core.processor.RecordProcessor;
 import io.github.thebesteric.framework.switchlogger.core.processor.RequestLoggerProcessor;
@@ -11,6 +12,7 @@ import io.github.thebesteric.framework.switchlogger.core.wrapper.SwitchLoggerFil
 import io.github.thebesteric.framework.switchlogger.core.wrapper.SwitchLoggerRequestWrapper;
 import io.github.thebesteric.framework.switchlogger.core.wrapper.SwitchLoggerResponseWrapper;
 import io.github.thebesteric.framework.switchlogger.utils.DurationWatch;
+import io.github.thebesteric.framework.switchlogger.utils.StringUtils;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -36,15 +38,18 @@ public class SwitchLoggerFilter extends SwitchLoggerFilterWrapper {
     private final SwitchLoggerProperties properties;
     private final List<RecordProcessor> recordProcessors;
     private final IgnoreUrlProcessor ignoreUrlProcessor;
+    private final GlobalResponseProcessor globalResponseProcessor;
 
     private RequestLoggerProcessor requestLoggerProcessor;
 
     public SwitchLoggerFilter(SwitchLoggerProperties properties, List<RecordProcessor> recordProcessors,
-                              RequestLoggerProcessor requestLoggerProcessor, IgnoreUrlProcessor ignoreUrlProcessor) {
+                              RequestLoggerProcessor requestLoggerProcessor, IgnoreUrlProcessor ignoreUrlProcessor,
+                              GlobalResponseProcessor globalResponseProcessor) {
         this.properties = properties;
         this.recordProcessors = recordProcessors;
         this.requestLoggerProcessor = requestLoggerProcessor;
         this.ignoreUrlProcessor = generateIgnoreUrlProcessor(ignoreUrlProcessor);
+        this.globalResponseProcessor = globalResponseProcessor;
     }
 
     @SneakyThrows
@@ -91,6 +96,15 @@ public class SwitchLoggerFilter extends SwitchLoggerFilterWrapper {
         // record request info
         RequestLog requestLog = generateRequestLoggerProcessor().processor(requestWrapper, responseWrapper, URL_MAPPING, trackIdThreadLocal, duration);
         requestLog.setTag(RequestLog.DEFAULT_TAG);
+
+        // handler global exception
+        if (!requestLog.getLevel().equals(InvokeLog.LEVEL_ERROR)) {
+            String exception = globalResponseProcessor.processor(requestLog.getResult());
+            if (!StringUtils.isEmpty(exception)) {
+                requestLog.setLevel(InvokeLog.LEVEL_ERROR);
+                requestLog.setException(exception);
+            }
+        }
 
         // recorder request log
         for (RecordProcessor recordProcessor : recordProcessors) {
