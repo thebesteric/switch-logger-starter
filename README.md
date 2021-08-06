@@ -233,13 +233,20 @@ sourceflag.switch-logger:
       exclude: []
 ```
 - GlobalResponse 全局异常处理机制
+> response-entities: 定义全局正常的返回 code 字段与值，支持定义多组
+> error-message-fields: 定义异常返回错误信息的字段名称
 ```yaml
 sourceflag:
   switch-logger:
     global-response:
-      code-field: code
-      succeed-code: 200
-      message-field: message
+      response-entities:
+        - code-field: code
+          code-value: 200
+        - code-field: code
+          code-value: 100
+      error-message-fields:
+        - msg
+        - message
 ```
 
 ### 扩展
@@ -377,7 +384,7 @@ public class SwitchLoggerConfiguration {
     @Bean
     public GlobalResponseProcessor globalResponseProcessor() {
         // result 为程序返回结果
-        return result -> "has some error in it";
+        return result -> "you can check result and return error message";
     }
 }
 ```
