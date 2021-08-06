@@ -3,6 +3,9 @@ package io.github.thebesteric.framework.switchlogger.configuration;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.Collections;
+import java.util.List;
+
 /**
  * SwitchLoggerProperties
  *
@@ -24,7 +27,7 @@ public class SwitchLoggerProperties {
     private boolean enable = true;
 
     // if global exception handling is used
-    private GlobalResponse globalResponse = new GlobalResponse();
+    private GlobalResponse globalResponse;
 
     // decide whether to use a thread pool
     private boolean async = false;
@@ -45,9 +48,15 @@ public class SwitchLoggerProperties {
 
     @Data
     public static class GlobalResponse {
-        private String codeField = "code";
-        private String messageField = "message";
-        private Integer succeedCode = 200;
+
+        private List<ResponseEntity> responseEntities = Collections.singletonList(new ResponseEntity());
+        private List<String> errorMessageFields = Collections.singletonList("message");
+
+        @Data
+        public static class ResponseEntity {
+            private String codeField = "code";
+            private String codeValue = "200";
+        }
     }
 
     @Data
