@@ -5,7 +5,7 @@
     <parent>
         <artifactId>switch-logger-starter</artifactId>
         <groupId>io.github.thebesteric.framework.switchlogger</groupId>
-        <version>1.0.0-RELEASE</version>
+        <version>1.0.1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
