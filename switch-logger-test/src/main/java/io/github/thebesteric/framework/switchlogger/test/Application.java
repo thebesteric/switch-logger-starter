@@ -1,10 +1,9 @@
 package io.github.thebesteric.framework.switchlogger.test;
 
 import io.github.thebesteric.framework.switchlogger.annotation.EnableSwitchLogger;
-import io.github.thebesteric.framework.switchlogger.core.processor.GlobalResponseProcessor;
+import io.github.thebesteric.framework.switchlogger.core.processor.GlobalSuccessResponseProcessor;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -18,9 +17,9 @@ public class Application {
         SpringApplication.run(Application.class, args);
     }
 
-    @Bean
-    public GlobalResponseProcessor globalResponseProcessor() {
-        return result -> "you can check result and return error message";
+    // @Bean
+    public GlobalSuccessResponseProcessor globalSuccessResponseProcessor() {
+        return (method, result) -> "you can check result and return error message";
     }
 
     @RestControllerAdvice

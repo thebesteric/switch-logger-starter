@@ -10,6 +10,7 @@ import java.util.Map;
 @Service
 public class TestService {
     public Map<String, Object> div(double x, double y) {
+        System.out.println(getSomething());
         if (y == 0) {
             throw new RuntimeException("divisor cannot be 0");
         }
@@ -17,5 +18,9 @@ public class TestService {
         params.put("code", 100);
         params.put("message", "ok!");
         return params;
+    }
+
+    public String getSomething() {
+        return "something";
     }
 }

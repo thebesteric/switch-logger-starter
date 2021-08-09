@@ -1,11 +1,12 @@
 sourceflag:
   switch-logger:
-    global-response:
+    global-success-response:
+      use-default: false
       response-entities:
         - code-field: code
           code-value: 200
         - code-field: code
           code-value: 100
-      error-message-fields:
+      message-fields:
         - msg
         - message
