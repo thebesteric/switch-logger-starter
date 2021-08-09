@@ -15,6 +15,9 @@ import java.util.UUID;
 public class TransactionUtils {
 
     public static ThreadLocal<String> create() {
+        if (SwitchLoggerFilterWrapper.trackIdThreadLocal != null) {
+            SwitchLoggerFilterWrapper.trackIdThreadLocal.remove();
+        }
         return create(UUID.randomUUID().toString().replaceAll("-", "").toUpperCase());
     }
 
@@ -28,6 +31,10 @@ public class TransactionUtils {
 
     public static void set(String id) {
         SwitchLoggerFilterWrapper.trackIdThreadLocal.set(id);
+    }
+
+    public static void initialize() {
+        SwitchLoggerFilterWrapper.trackIdThreadLocal = create();
     }
 
 }
