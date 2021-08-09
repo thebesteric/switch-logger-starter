@@ -232,19 +232,21 @@ sourceflag.switch-logger:
       include: [".*"]
       exclude: []
 ```
-- GlobalResponse 全局异常处理机制
+- GlobalResponse 全局成功返回处理机制
+> use-default: 使用默认全局成功返回处理机器
 > response-entities: 定义全局正常的返回 code 字段与值，支持定义多组
-> error-message-fields: 定义异常返回错误信息的字段名称
+> message-fields: 定义返回信息的字段名称
 ```yaml
 sourceflag:
   switch-logger:
-    global-response:
+    global-success-response:
+      use-default: false # you can use default global success response if use-default is true
       response-entities:
         - code-field: code
           code-value: 200
         - code-field: code
           code-value: 100
-      error-message-fields:
+      message-fields:
         - msg
         - message
 ```
@@ -376,15 +378,18 @@ public class SwitchLoggerConfiguration {
 }
 ```
 
-- GlobalResponseProcessor 接口：自定义全局异常处理
+- GlobalResponseProcessor 接口：自定义全局成功返回处理
 > 当项目自定义全局异常处理器后，可能 SwitchLogger 就无法捕捉到异常了，此时可以扩展此接口，指明异常判断方式
+> method: 表示当前执行的方法，当是 controller 层执行的时候，method 可能为空
+> result: 为程序返回结果
 ```java
 @Configuration
 public class SwitchLoggerConfiguration {
     @Bean
-    public GlobalResponseProcessor globalResponseProcessor() {
+    public GlobalSuccessResponseProcessor globalSuccessResponseProcessor() {
+        // method 当前执行的方法
         // result 为程序返回结果
-        return result -> "you can check result and return error message";
+        return (method, result) -> "you can check result and return error message";
     }
 }
 ```
