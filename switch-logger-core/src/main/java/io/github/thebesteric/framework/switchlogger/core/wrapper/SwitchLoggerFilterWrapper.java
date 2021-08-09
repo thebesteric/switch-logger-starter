@@ -20,9 +20,10 @@ public abstract class SwitchLoggerFilterWrapper implements Filter {
 
     public static final Map<String, Method> URL_MAPPING = new ConcurrentHashMap<>(128);
 
-    public static final ThreadLocal<String> trackIdThreadLocal = TransactionUtils.create();
+    public static ThreadLocal<String> trackIdThreadLocal = TransactionUtils.create();
 
     protected void initTrackId(SwitchLoggerRequestWrapper requestWrapper) {
+        TransactionUtils.initialize();
         Enumeration<String> headerNames = requestWrapper.getHeaderNames();
         while (headerNames.hasMoreElements()) {
             String headerName = headerNames.nextElement();

@@ -11,7 +11,7 @@ import io.github.thebesteric.framework.switchlogger.core.processor.mapping.*;
 import io.github.thebesteric.framework.switchlogger.core.processor.record.CacheRecordProcessor;
 import io.github.thebesteric.framework.switchlogger.core.processor.record.LogRecordProcessor;
 import io.github.thebesteric.framework.switchlogger.core.processor.record.StdoutRecordProcessor;
-import io.github.thebesteric.framework.switchlogger.core.processor.response.DefaultGlobalResponseProcessor;
+import io.github.thebesteric.framework.switchlogger.core.processor.response.DefaultGlobalSuccessResponseProcessor;
 import io.github.thebesteric.framework.switchlogger.core.scaner.SwitchLoggerScanner;
 import io.github.thebesteric.framework.switchlogger.core.scaner.annotated.SwitchLoggerAnnotatedEnhancer;
 import io.github.thebesteric.framework.switchlogger.core.scaner.controller.SwitchLoggerControllerScanner;
@@ -51,11 +51,11 @@ public class SwitchLoggerAutoConfiguration {
     public FilterRegistrationBean filterRegister(SwitchLoggerProperties properties, List<RecordProcessor> recordProcessors,
                                                  @Nullable RequestLoggerProcessor requestLoggerProcessor,
                                                  @Nullable IgnoreUrlProcessor ignoreUrlProcessor,
-                                                 GlobalResponseProcessor globalResponseProcessor) {
+                                                 GlobalSuccessResponseProcessor globalSuccessResponseProcessor) {
         FilterRegistrationBean frBean = new FilterRegistrationBean();
         frBean.setName(properties.getFilter().getName());
         frBean.setFilter(new SwitchLoggerFilter(properties, recordProcessors, requestLoggerProcessor,
-                ignoreUrlProcessor, globalResponseProcessor));
+                ignoreUrlProcessor, globalSuccessResponseProcessor));
         frBean.setOrder(properties.getFilter().getOrder());
         frBean.addUrlPatterns(properties.getFilter().getUrlPatterns());
         return frBean;
@@ -71,16 +71,21 @@ public class SwitchLoggerAutoConfiguration {
                                                                        SwitchLoggerProperties properties,
                                                                        List<RecordProcessor> recordProcessors,
                                                                        List<AttributeProcessor> attributeProcessors,
-                                                                       GlobalResponseProcessor globalResponseProcessor) {
-        return new SwitchLoggerAnnotatedEnhancer(factory, properties, recordProcessors, attributeProcessors, globalResponseProcessor);
+                                                                       GlobalSuccessResponseProcessor globalSuccessResponseProcessor) {
+        return new SwitchLoggerAnnotatedEnhancer(factory, properties, recordProcessors, attributeProcessors, globalSuccessResponseProcessor);
     }
 
     // Global Response
 
-    @Bean(name = "switchGlobalResponseProcessor")
-    @ConditionalOnMissingBean(GlobalResponseProcessor.class)
-    public GlobalResponseProcessor globalResponseProcessor(SwitchLoggerProperties properties) {
-        return new DefaultGlobalResponseProcessor(properties);
+    @Bean
+    @ConditionalOnMissingBean
+    public GlobalSuccessResponseProcessor globalSuccessResponseProcessor(SwitchLoggerProperties properties) {
+        return new DefaultGlobalSuccessResponseProcessor(properties);
+    }
+
+    @Bean
+    public DefaultGlobalSuccessResponseInitialize globalSuccessResponseInitialize() {
+        return new DefaultGlobalSuccessResponseInitialize();
     }
 
     // Mapping Processor

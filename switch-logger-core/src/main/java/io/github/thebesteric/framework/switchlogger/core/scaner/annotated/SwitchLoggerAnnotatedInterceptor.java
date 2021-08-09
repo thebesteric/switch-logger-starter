@@ -3,7 +3,7 @@ package io.github.thebesteric.framework.switchlogger.core.scaner.annotated;
 import io.github.thebesteric.framework.switchlogger.annotation.SwitchLogger;
 import io.github.thebesteric.framework.switchlogger.configuration.SwitchLoggerProperties;
 import io.github.thebesteric.framework.switchlogger.core.domain.InvokeLog;
-import io.github.thebesteric.framework.switchlogger.core.processor.GlobalResponseProcessor;
+import io.github.thebesteric.framework.switchlogger.core.processor.GlobalSuccessResponseProcessor;
 import io.github.thebesteric.framework.switchlogger.core.processor.RecordProcessor;
 import io.github.thebesteric.framework.switchlogger.core.wrapper.SwitchLoggerFilterWrapper;
 import io.github.thebesteric.framework.switchlogger.utils.StringUtils;
@@ -31,7 +31,7 @@ public class SwitchLoggerAnnotatedInterceptor implements MethodInterceptor {
 
     private final SwitchLoggerProperties properties;
     private final List<RecordProcessor> recordProcessors;
-    private final GlobalResponseProcessor globalResponseProcessor;
+    private final GlobalSuccessResponseProcessor globalSuccessResponseProcessor;
 
     @Override
     public Object intercept(Object obj, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
@@ -42,7 +42,7 @@ public class SwitchLoggerAnnotatedInterceptor implements MethodInterceptor {
         long startTime = System.currentTimeMillis(), durationTime;
         try {
             result = methodProxy.invokeSuper(obj, args);
-            exception = globalResponseProcessor.processor(result);
+            exception = globalSuccessResponseProcessor.processor(method, result);
             return result;
         } catch (Throwable throwable) {
             exception = throwable.getMessage();

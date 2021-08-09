@@ -3,7 +3,7 @@ package io.github.thebesteric.framework.switchlogger.core;
 import io.github.thebesteric.framework.switchlogger.configuration.SwitchLoggerProperties;
 import io.github.thebesteric.framework.switchlogger.core.domain.InvokeLog;
 import io.github.thebesteric.framework.switchlogger.core.domain.RequestLog;
-import io.github.thebesteric.framework.switchlogger.core.processor.GlobalResponseProcessor;
+import io.github.thebesteric.framework.switchlogger.core.processor.GlobalSuccessResponseProcessor;
 import io.github.thebesteric.framework.switchlogger.core.processor.IgnoreUrlProcessor;
 import io.github.thebesteric.framework.switchlogger.core.processor.RecordProcessor;
 import io.github.thebesteric.framework.switchlogger.core.processor.RequestLoggerProcessor;
@@ -38,18 +38,18 @@ public class SwitchLoggerFilter extends SwitchLoggerFilterWrapper {
     private final SwitchLoggerProperties properties;
     private final List<RecordProcessor> recordProcessors;
     private final IgnoreUrlProcessor ignoreUrlProcessor;
-    private final GlobalResponseProcessor globalResponseProcessor;
+    private final GlobalSuccessResponseProcessor globalSuccessResponseProcessor;
 
     private RequestLoggerProcessor requestLoggerProcessor;
 
     public SwitchLoggerFilter(SwitchLoggerProperties properties, List<RecordProcessor> recordProcessors,
                               RequestLoggerProcessor requestLoggerProcessor, IgnoreUrlProcessor ignoreUrlProcessor,
-                              GlobalResponseProcessor globalResponseProcessor) {
+                              GlobalSuccessResponseProcessor globalSuccessResponseProcessor) {
         this.properties = properties;
         this.recordProcessors = recordProcessors;
         this.requestLoggerProcessor = requestLoggerProcessor;
         this.ignoreUrlProcessor = generateIgnoreUrlProcessor(ignoreUrlProcessor);
-        this.globalResponseProcessor = globalResponseProcessor;
+        this.globalSuccessResponseProcessor = globalSuccessResponseProcessor;
     }
 
     @SneakyThrows
@@ -99,7 +99,7 @@ public class SwitchLoggerFilter extends SwitchLoggerFilterWrapper {
 
         // handler global exception
         if (!requestLog.getLevel().equals(InvokeLog.LEVEL_ERROR)) {
-            String exception = globalResponseProcessor.processor(requestLog.getResult());
+            String exception = globalSuccessResponseProcessor.processor(null, requestLog.getResult());
             if (!StringUtils.isEmpty(exception)) {
                 requestLog.setLevel(InvokeLog.LEVEL_ERROR);
                 requestLog.setException(exception);

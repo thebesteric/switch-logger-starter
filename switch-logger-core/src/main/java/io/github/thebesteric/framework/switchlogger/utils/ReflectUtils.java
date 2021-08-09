@@ -91,6 +91,14 @@ public class ReflectUtils {
         return fieldNames;
     }
 
+    public static <T extends Annotation> T getAnnotation(Class<?> objectClass, Class<T> annotationClass) {
+        return objectClass.getAnnotation(annotationClass);
+    }
+
+    public static <T extends Annotation> T getAnnotation(Method method, Class<T> annotationClass) {
+        return method.getAnnotation(annotationClass);
+    }
+
     public static boolean isAnnotationPresent(Class<?> objectClass, Class<? extends Annotation> annotationClass) {
         if (objectClass.isAnnotationPresent(annotationClass)) {
             return true;
