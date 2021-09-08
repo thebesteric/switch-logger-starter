@@ -3,6 +3,15 @@
 > 基于 Spring Boot 的一款全局控制层日志记录插件
 
 ### Quick start
+[Download By Maven Center](https://search.maven.org/search?q=g:io.github.thebesteric.framework.switchlogger)
+```xml
+<dependency>
+  <groupId>io.github.thebesteric.framework.switchlogger</groupId>
+  <artifactId>switch-logger-core</artifactId>
+  <version>${latest.version}</version>
+</dependency>
+```
+
 在启动类注解上标记 `@EnableSwitchLogger` 即可
 ```java
 @EnableSwitchLogger
@@ -180,19 +189,19 @@ sourceflag.switch-logger:
     model: log # logging mode, support log, stdout, mysql, redis, local cache
 ```
 - LOG 配置模式
-> 直接输出到日志文件
+> 输出到日志文件
 ```yaml
 sourceflag.switch-logger:
     model: log
 ```
 - STDOUT 配置模式
-> 直接输出到控制台
+> 输出到控制台
 ```yaml
 sourceflag.switch-logger:
-    model: log
+    model: stdout
 ```
 - MySQL 配置模式
-> 支持自动建表，无需手工维护表
+> 写到数据库指定表中（支持自动建表，无需手工维护表）
 ```yaml
 sourceflag.switch-logger:
     model: database
@@ -223,7 +232,7 @@ sourceflag.switch-logger:
       database: 0
       expired-time: 3600
 ```
-- filter 自定义拦截位置
+- Filter 自定义拦截位置
 ```yaml
 sourceflag.switch-logger:
     model: log
@@ -233,8 +242,8 @@ sourceflag.switch-logger:
       exclude: []
 ```
 - GlobalResponse 全局成功返回处理机制
-> use-default: 使用默认全局成功返回处理机器
-> response-entities: 定义全局正常的返回 code 字段与值，支持定义多组
+> use-default: 使用默认全局成功返回处理机器  
+> response-entities: 定义全局正常的返回 code 字段与值，支持定义多组  
 > message-fields: 定义返回信息的字段名称
 ```yaml
 sourceflag:
@@ -249,6 +258,14 @@ sourceflag:
       message-fields:
         - msg
         - message
+```
+- PrivateMethodLogging 私有方法是否记录日志
+> 默认值为 false，系统默认不对私有方法进行日志记录，如有需要可以设置为 true  
+> 当设置为 true 时，如不希望记录该方法的调用信息时，可以配合 @IgnoreSwitchLogger 进行忽略
+```yaml
+sourceflag:
+  switch-logger:
+    private-method-logging: true
 ```
 
 ### 扩展
@@ -379,8 +396,8 @@ public class SwitchLoggerConfiguration {
 ```
 
 - GlobalResponseProcessor 接口：自定义全局成功返回处理
-> 当项目自定义全局异常处理器后，可能 SwitchLogger 就无法捕捉到异常了，此时可以扩展此接口，指明异常判断方式
-> method: 表示当前执行的方法，当是 controller 层执行的时候，method 可能为空
+> 当项目自定义全局异常处理器后，可能 SwitchLogger 就无法捕捉到异常了，此时可以扩展此接口，指明异常判断方式  
+> method: 表示当前执行的方法，当是 controller 层执行的时候，method 为空  
 > result: 为程序返回结果
 ```java
 @Configuration
@@ -438,6 +455,22 @@ public class RegisterController {
     @PostMapping("/register")
     public Object register(@RequestParam @IgnoreParam("******") String mobile) {
         return "success";
+    }
+}
+```
+
+- 关于 @IgnoreSwitchLogger
+
+`@IgnoreSwitchLogger` 注解，用来标记在类或方法上，用来忽略记录日志
+
+> 当在类上使用了 `@IgnoreSwitchLogger` 注解后，日志将不会记录该类下所有方法到日志情况  
+> `@IgnoreSwitchLogger` 与 `@SwitchLogger` 同时存在时，`@IgnoreSwitchLogger` 优先级更高
+```java
+public class BaseService {
+    @IgnoreSwitchLogger
+    public List<String> foo(List<String> arr) {
+        arr.add("test");
+        return arr;
     }
 }
 ```
