@@ -142,6 +142,14 @@ public class ReflectUtils {
         return method.isAnnotationPresent(annotationClass);
     }
 
+    public static Class<?> getClassByMethod(Method method) {
+        return method.getDeclaringClass();
+    }
+
+    public static List<Method> getMethods(Class<?> clazz) {
+        return Arrays.asList(clazz.getMethods());
+    }
+
     public static Constructor<?> determineConstructor(Class<?> clazz) {
         Constructor<?>[] rawCandidates = clazz.getDeclaredConstructors();
         List<Constructor<?>> constructors = Arrays.asList(rawCandidates);

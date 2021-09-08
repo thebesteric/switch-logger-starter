@@ -27,6 +27,9 @@ public class SwitchLoggerProperties {
 
     private boolean enable = true;
 
+    // whether private methods are logged
+    private boolean privateMethodLogging = false;
+
     // if global exception handling is used
     private GlobalSuccessResponse globalSuccessResponse;
 

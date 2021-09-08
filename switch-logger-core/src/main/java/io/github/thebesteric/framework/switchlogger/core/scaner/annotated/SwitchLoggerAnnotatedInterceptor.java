@@ -39,7 +39,9 @@ public class SwitchLoggerAnnotatedInterceptor implements MethodInterceptor {
     public Object intercept(Object obj, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
 
         // has @IgnoreSwitchLogger
-        if (ReflectUtils.isAnnotationPresent(method, IgnoreSwitchLogger.class) || ReflectUtils.isPrivate(method)) {
+        if (ReflectUtils.isAnnotationPresent(method.getDeclaringClass(), IgnoreSwitchLogger.class)
+                || ReflectUtils.isAnnotationPresent(method, IgnoreSwitchLogger.class)
+                || (!properties.isPrivateMethodLogging() && ReflectUtils.isPrivate(method))) {
             return methodProxy.invokeSuper(obj, args);
         }
 
@@ -136,6 +138,5 @@ public class SwitchLoggerAnnotatedInterceptor implements MethodInterceptor {
         }
 
     }
-
 
 }
