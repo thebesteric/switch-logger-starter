@@ -10,8 +10,6 @@ import java.lang.annotation.*;
 @Documented
 public @interface SwitchLogger {
 
-    boolean enable() default true;
-
     @AliasFor("tag")
     String value() default "";
 

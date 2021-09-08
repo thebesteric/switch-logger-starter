@@ -1,11 +1,13 @@
 package io.github.thebesteric.framework.switchlogger.core.scaner.annotated;
 
+import io.github.thebesteric.framework.switchlogger.annotation.IgnoreSwitchLogger;
 import io.github.thebesteric.framework.switchlogger.annotation.SwitchLogger;
 import io.github.thebesteric.framework.switchlogger.configuration.SwitchLoggerProperties;
 import io.github.thebesteric.framework.switchlogger.core.domain.InvokeLog;
 import io.github.thebesteric.framework.switchlogger.core.processor.GlobalSuccessResponseProcessor;
 import io.github.thebesteric.framework.switchlogger.core.processor.RecordProcessor;
 import io.github.thebesteric.framework.switchlogger.core.wrapper.SwitchLoggerFilterWrapper;
+import io.github.thebesteric.framework.switchlogger.utils.ReflectUtils;
 import io.github.thebesteric.framework.switchlogger.utils.StringUtils;
 import lombok.Builder;
 import lombok.Getter;
@@ -35,12 +37,19 @@ public class SwitchLoggerAnnotatedInterceptor implements MethodInterceptor {
 
     @Override
     public Object intercept(Object obj, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
+
+        // has @IgnoreSwitchLogger
+        if (ReflectUtils.isAnnotationPresent(method, IgnoreSwitchLogger.class) || ReflectUtils.isPrivate(method)) {
+            return methodProxy.invokeSuper(obj, args);
+        }
+
         final String trackId = SwitchLoggerFilterWrapper.trackIdThreadLocal.get();
         SwitchLoggerAnnotationInfo switchLoggerAnnotationInfo = extractSwitchLoggerAnnotationInfo(method);
         String exception = null;
         Object result = null;
         long startTime = System.currentTimeMillis(), durationTime;
         try {
+            // execute the method
             result = methodProxy.invokeSuper(obj, args);
             exception = globalSuccessResponseProcessor.processor(method, result);
             return result;

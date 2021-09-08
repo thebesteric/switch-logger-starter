@@ -16,54 +16,77 @@ import java.util.List;
  */
 public class ReflectUtils {
 
-    public static String[] getModifiers(Method method) {
-        return Modifier.toString(method.getModifiers()).split(" ");
+    public static boolean isPublic(Class<?> clazz) {
+        return Modifier.isPublic(clazz.getModifiers());
     }
 
     public static boolean isPublic(Method method) {
         return Modifier.isPublic(method.getModifiers());
     }
 
-    public static boolean isStatic(Method method) {
-        return Modifier.isStatic(method.getModifiers());
+    public static boolean isPublic(Field field) {
+        return Modifier.isPublic(field.getModifiers());
     }
 
-    public static boolean isFinal(Method method) {
-        return Modifier.isFinal(method.getModifiers());
+    public static boolean isPrivate(Class<?> clazz) {
+        return Modifier.isPrivate(clazz.getModifiers());
     }
 
-    public static String[] getModifiers(Class<?> clazz) {
-        return Modifier.toString(clazz.getModifiers()).split(" ");
+    public static boolean isPrivate(Method method) {
+        return Modifier.isPrivate(method.getModifiers());
     }
 
-    public static boolean isPublic(Class<?> clazz) {
-        return Modifier.isPublic(clazz.getModifiers());
+    public static boolean isPrivate(Field field) {
+        return Modifier.isPrivate(field.getModifiers());
+    }
+
+    public static boolean isProtected(Class<?> clazz) {
+        return Modifier.isProtected(clazz.getModifiers());
+    }
+
+    public static boolean isProtected(Method method) {
+        return Modifier.isProtected(method.getModifiers());
+    }
+
+    public static boolean isProtected(Field field) {
+        return Modifier.isProtected(field.getModifiers());
     }
 
     public static boolean isStatic(Class<?> clazz) {
         return Modifier.isStatic(clazz.getModifiers());
     }
 
-    public static boolean isFinal(Class<?> clazz) {
-        return Modifier.isFinal(clazz.getModifiers());
-    }
-
-    public static String[] getModifiers(Field field) {
-        return Modifier.toString(field.getModifiers()).split(" ");
-    }
-
-    public static boolean isPublic(Field field) {
-        return Modifier.isPublic(field.getModifiers());
+    public static boolean isStatic(Method method) {
+        return Modifier.isStatic(method.getModifiers());
     }
 
     public static boolean isStatic(Field field) {
         return Modifier.isStatic(field.getModifiers());
     }
 
+    public static boolean isFinal(Class<?> clazz) {
+        return Modifier.isFinal(clazz.getModifiers());
+    }
+
+    public static boolean isFinal(Method method) {
+        return Modifier.isFinal(method.getModifiers());
+    }
+
     public static boolean isFinal(Field field) {
         return Modifier.isFinal(field.getModifiers());
     }
 
+    public static String[] getModifiers(Class<?> clazz) {
+        return Modifier.toString(clazz.getModifiers()).split(" ");
+    }
+
+    public static String[] getModifiers(Method method) {
+        return Modifier.toString(method.getModifiers()).split(" ");
+    }
+
+    public static String[] getModifiers(Field field) {
+        return Modifier.toString(field.getModifiers()).split(" ");
+    }
 
     public static List<Field> getFields(Class<?> clazz) {
         List<Field> fields = new ArrayList<>();
@@ -77,7 +100,6 @@ public class ReflectUtils {
         }
         return fields;
     }
-
 
     public static List<String> getFieldName(Class<?> clazz) {
         List<Field> fields = getFields(clazz);
@@ -99,17 +121,25 @@ public class ReflectUtils {
         return method.getAnnotation(annotationClass);
     }
 
-    public static boolean isAnnotationPresent(Class<?> objectClass, Class<? extends Annotation> annotationClass) {
-        if (objectClass.isAnnotationPresent(annotationClass)) {
+    public static boolean anyAnnotationPresent(Class<?> objectClass, Class<? extends Annotation> annotationClass) {
+        if (isAnnotationPresent(objectClass, annotationClass)) {
             return true;
         } else {
             for (Method method : objectClass.getDeclaredMethods()) {
-                if (method.isAnnotationPresent(annotationClass)) {
+                if (isAnnotationPresent(method, annotationClass)) {
                     return true;
                 }
             }
         }
         return false;
+    }
+
+    public static boolean isAnnotationPresent(Class<?> objectClass, Class<? extends Annotation> annotationClass) {
+        return objectClass.isAnnotationPresent(annotationClass);
+    }
+
+    public static boolean isAnnotationPresent(Method method, Class<? extends Annotation> annotationClass) {
+        return method.isAnnotationPresent(annotationClass);
     }
 
     public static Constructor<?> determineConstructor(Class<?> clazz) {

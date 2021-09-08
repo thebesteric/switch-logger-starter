@@ -52,13 +52,7 @@ public class SwitchLoggerAnnotatedEnhancer implements BeanPostProcessor {
 
         // Not proxy layer
         if ((beanClass.isAnnotationPresent(Controller.class) || beanClass.isAnnotationPresent(RestController.class))
-                && !ReflectUtils.isAnnotationPresent(beanClass, SwitchLogger.class)) {
-            return bean;
-        }
-
-        // has @SwitchLogger and @SwitchLogger is enabled
-        SwitchLogger switchLogger = ReflectUtils.getAnnotation(beanClass, SwitchLogger.class);
-        if (switchLogger != null && !switchLogger.enable()) {
+                && !ReflectUtils.anyAnnotationPresent(beanClass, SwitchLogger.class)) {
             return bean;
         }
 

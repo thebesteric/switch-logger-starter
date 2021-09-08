@@ -2,11 +2,9 @@ package io.github.thebesteric.framework.switchlogger.core.processor.response;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import io.github.thebesteric.framework.switchlogger.annotation.SwitchLogger;
 import io.github.thebesteric.framework.switchlogger.configuration.SwitchLoggerProperties;
 import io.github.thebesteric.framework.switchlogger.core.processor.GlobalSuccessResponseProcessor;
 import io.github.thebesteric.framework.switchlogger.utils.JsonUtils;
-import io.github.thebesteric.framework.switchlogger.utils.ReflectUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,13 +21,6 @@ public class DefaultGlobalSuccessResponseProcessor implements GlobalSuccessRespo
     public String processor(Method method, Object result) {
         SwitchLoggerProperties.GlobalSuccessResponse globalResponse = properties.getGlobalSuccessResponse();
         if (globalResponse != null) {
-            if (method != null) {
-                SwitchLogger switchLogger = ReflectUtils.getAnnotation(method, SwitchLogger.class);
-                // if @SwitchLogger is disabled
-                if (switchLogger != null && !switchLogger.enable()) {
-                    return null;
-                }
-            }
             try {
                 String resultJsonStr = JsonUtils.mapper.writeValueAsString(result);
                 JsonNode resultJsonNode = JsonUtils.mapper.readTree(resultJsonStr);
