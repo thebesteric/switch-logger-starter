@@ -267,6 +267,13 @@ sourceflag:
   switch-logger:
     private-method-logging: true
 ```
+- 使用 SkyWalking 的 traceId 代替 trackId
+> 当设置为 true 时，使用 SkyWalking 的 traceId 来替代默认的 trackId
+```yaml
+sourceflag:
+  switch-logger:
+    sky-walking-trace: true
+```
 
 ### 扩展
 - MappingProcessor 接口: 可自定义接口扫描规则

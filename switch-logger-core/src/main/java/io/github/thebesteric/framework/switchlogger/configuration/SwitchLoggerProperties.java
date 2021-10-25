@@ -50,6 +50,9 @@ public class SwitchLoggerProperties {
 
     private Filter filter = new Filter();
 
+    // decide whether to use SkyWalking trace id
+    private boolean skyWalkingTrace = false;
+
     @Data
     public static class GlobalSuccessResponse {
         private boolean useDefault;

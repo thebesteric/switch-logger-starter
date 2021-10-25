@@ -1,5 +1,9 @@
+server:
+  port: 8081
+
 sourceflag:
   switch-logger:
+    sky-walking-trace: true
     global-success-response:
       use-default: false
       response-entities:

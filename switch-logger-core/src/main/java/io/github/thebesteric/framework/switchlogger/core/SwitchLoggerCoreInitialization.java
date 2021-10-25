@@ -33,11 +33,12 @@ public class SwitchLoggerCoreInitialization extends SwitchLoggerInitialization {
     @Override
     public void start() {
         if (!properties.isEnable()) {
-            log.info("SWITCH LOGGER is disabled");
+            log.info("SWITCH LOGGER is Disabled");
             return;
         }
 
         log.info("Switch Logger Record Model is {}, Running Model is {}", properties.getModel(), properties.isAsync() ? "Async" : "Sync");
+        log.info("Switch Logger Track-Id generator is {}", properties.isSkyWalkingTrace() ? "SkyWalking" : "Local");
 
         String projectPath = getProjectPath();
         // scanner @Controller and @SwitchLogger and so on

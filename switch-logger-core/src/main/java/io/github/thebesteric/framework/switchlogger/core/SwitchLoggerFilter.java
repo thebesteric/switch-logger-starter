@@ -83,7 +83,7 @@ public class SwitchLoggerFilter extends SwitchLoggerFilterWrapper {
         // record spend time
         DurationWatch.start();
         try {
-            initTrackId(requestWrapper);
+            initTrackId(requestWrapper, properties.isSkyWalkingTrace());
             filterChain.doFilter(requestWrapper, responseWrapper);
         } catch (Exception ex) {
             ex.printStackTrace();
