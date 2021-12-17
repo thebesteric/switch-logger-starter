@@ -274,6 +274,20 @@ sourceflag:
   switch-logger:
     sky-walking-trace: true
 ```
+- RPC 监控配置
+> 监控 RPC 客户端，目前支持 feign 和 forest
+> succeed-codes: 指定 http 成功响应的状态码
+```yaml
+sourceflag:
+  switch-logger:
+    rpc:
+      feign:
+        enable: true
+        succeed-codes: [100, 200]
+      forest:
+        enable: false
+        succeed-codes: [100, 200]
+```
 
 ### 扩展
 - MappingProcessor 接口: 可自定义接口扫描规则
