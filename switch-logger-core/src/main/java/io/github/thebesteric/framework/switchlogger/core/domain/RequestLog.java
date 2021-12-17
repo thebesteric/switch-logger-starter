@@ -10,6 +10,7 @@ import lombok.*;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * RequestLog
@@ -104,6 +105,14 @@ public class RequestLog extends InvokeLog {
 
         // uri
         this.uri = requestWrapper.getRequestURI();
+
+        // response
+        this.response = new Response();
+        response.setStatus(responseWrapper.getStatus());
+        response.setContentType(responseWrapper.getContentType());
+        response.setLocale(responseWrapper.getLocale().toString());
+        Map<String, String> responseHeaders = responseWrapper.getHeaderNames().stream().collect(Collectors.toMap((key) -> key, responseWrapper::getHeader));
+        response.setHeaders(responseHeaders);
     }
 
     @JsonProperty("request_session_id")
@@ -158,6 +167,9 @@ public class RequestLog extends InvokeLog {
     @Column(length = 11, type = "int")
     private long duration;
 
+    @Column(type = "json")
+    private Response response;
+
     @Data
     @EqualsAndHashCode(callSuper = true)
     @NoArgsConstructor
@@ -185,6 +197,16 @@ public class RequestLog extends InvokeLog {
         private int version = 0;
         private boolean isHttpOnly = false;
 
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = true)
+    @NoArgsConstructor
+    public static class Response extends AbstractEntity {
+        private int status;
+        private String contentType;
+        private String locale;
+        private Map<String, String> headers = new HashMap<>();
     }
 
 }

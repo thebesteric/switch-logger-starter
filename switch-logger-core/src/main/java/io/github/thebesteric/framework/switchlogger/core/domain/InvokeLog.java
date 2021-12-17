@@ -39,6 +39,8 @@ public class InvokeLog extends AbstractEntity {
     public static final String LEVEL_WARN = "WARN";
 
     public static final String DEFAULT_TAG = "default";
+    public static final String FEIGN_TAG = "feign";
+    public static final String FOREST_TAG = "forest";
 
     @Column(length = 64)
     protected String tag = DEFAULT_TAG;

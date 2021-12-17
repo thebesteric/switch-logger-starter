@@ -26,10 +26,14 @@ public abstract class SwitchLoggerFilterWrapper implements Filter {
 
     public static ThreadLocal<String> trackIdThreadLocal = TransactionUtils.create();
 
+    public static boolean skyWalkingWarnTips = false;
+
     protected void initTrackId(SwitchLoggerRequestWrapper requestWrapper, boolean isSkyWalkingTrace) {
         if (isSkyWalkingTrace) {
-            if (StringUtils.isEmpty(TraceContext.traceId()) || "Ignored_Trace".equalsIgnoreCase(TraceContext.traceId())) {
-                log.warn("Please check sky walking agent setting are correct or OAP Server are running, used local track id instead");
+            if (!skyWalkingWarnTips
+                    && (StringUtils.isEmpty(TraceContext.traceId()) || "Ignored_Trace".equalsIgnoreCase(TraceContext.traceId()))) {
+                log.warn("Please check Sky Walking agent setting are correct or OAP Server are running, used local track id instead");
+                skyWalkingWarnTips = true;
                 TransactionUtils.initialize();
             } else {
                 trackIdThreadLocal.set(TraceContext.traceId());

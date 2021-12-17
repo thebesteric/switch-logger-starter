@@ -1,7 +1,11 @@
 package io.github.thebesteric.framework.switchlogger.configuration;
 
+import com.dtflys.forest.interceptor.Interceptor;
+import com.dtflys.forest.springboot.ForestBeanRegister;
+import com.dtflys.forest.springboot.properties.ForestConfigurationProperties;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import feign.Logger;
 import io.github.thebesteric.framework.switchlogger.configuration.marker.SwitchLoggerCacheMarker;
 import io.github.thebesteric.framework.switchlogger.configuration.marker.SwitchLoggerMarker;
 import io.github.thebesteric.framework.switchlogger.core.SwitchLoggerCoreInitialization;
@@ -12,15 +16,21 @@ import io.github.thebesteric.framework.switchlogger.core.processor.record.CacheR
 import io.github.thebesteric.framework.switchlogger.core.processor.record.LogRecordProcessor;
 import io.github.thebesteric.framework.switchlogger.core.processor.record.StdoutRecordProcessor;
 import io.github.thebesteric.framework.switchlogger.core.processor.response.DefaultGlobalSuccessResponseProcessor;
+import io.github.thebesteric.framework.switchlogger.core.rpc.FeignLogger;
+import io.github.thebesteric.framework.switchlogger.core.rpc.ForestInterceptor;
 import io.github.thebesteric.framework.switchlogger.core.scaner.SwitchLoggerScanner;
 import io.github.thebesteric.framework.switchlogger.core.scaner.annotated.SwitchLoggerAnnotatedEnhancer;
 import io.github.thebesteric.framework.switchlogger.core.scaner.controller.SwitchLoggerControllerScanner;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
@@ -148,5 +158,45 @@ public class SwitchLoggerAutoConfiguration {
                 .maximumSize(properties.getCache().getMaximumSize())
                 .expireAfterWrite(properties.getCache().getExpiredTime(), TimeUnit.SECONDS)
                 .build();
+    }
+
+    @Configuration
+    @EnableConfigurationProperties(SwitchLoggerProperties.class)
+    public static class RpcConfig {
+
+        @Autowired
+        private ConfigurableApplicationContext applicationContext;
+
+        @Bean
+        @ConditionalOnProperty(prefix = "sourceflag.switch-logger.rpc.feign", name = "enable", havingValue = "true")
+        @ConditionalOnClass(Logger.class)
+        public Logger.Level feignLogLevel() {
+            return Logger.Level.FULL;
+        }
+
+        @Bean
+        @ConditionalOnProperty(prefix = "sourceflag.switch-logger.rpc", name = "feign.enable", havingValue = "true")
+        @ConditionalOnClass(Logger.class)
+        public Logger feignLogger() {
+            return new FeignLogger();
+        }
+
+        @Bean
+        @ConditionalOnProperty(prefix = "sourceflag.switch-logger.rpc", name = "forest.enable", havingValue = "true")
+        @ConditionalOnClass(Interceptor.class)
+        public <T> Interceptor<T> forestInterceptor() {
+            return new ForestInterceptor<>();
+        }
+
+        @Bean
+        @ConditionalOnProperty(prefix = "sourceflag.switch-logger.rpc", name = "forest.enable", havingValue = "true")
+        @ConditionalOnClass(ForestBeanRegister.class)
+        public ForestBeanRegister forestBeanRegister(ForestConfigurationProperties forestConfigurationProperties) {
+            forestConfigurationProperties.getInterceptors().add(ForestInterceptor.class);
+            ForestBeanRegister forestBeanRegister = new ForestBeanRegister(applicationContext, forestConfigurationProperties);
+            forestBeanRegister.registerForestConfiguration(forestConfigurationProperties);
+            forestBeanRegister.registerScanner(forestConfigurationProperties);
+            return forestBeanRegister;
+        }
     }
 }

@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -53,6 +54,9 @@ public class SwitchLoggerProperties {
     // decide whether to use SkyWalking trace id
     private boolean skyWalkingTrace = false;
 
+    // RPC Config
+    private Rpc rpc = new Rpc();
+
     @Data
     public static class GlobalSuccessResponse {
         private boolean useDefault;
@@ -99,6 +103,27 @@ public class SwitchLoggerProperties {
         private int initialCapacity = 2000;
         private int maximumSize = 20000;
         private int expiredTime = 3600;
+    }
+
+    @Data
+    public static class Rpc {
+
+        private Feign feign = new Feign();
+        private Forest forest = new Forest();
+
+        @Data
+        public static class Feign {
+            public static final int DEFAULT_SUCCEED_CODE = 200;
+            private boolean enable = true;
+            private List<Integer> succeedCodes = Collections.singletonList(DEFAULT_SUCCEED_CODE);
+        }
+
+        @Data
+        public static class Forest {
+            public static final int DEFAULT_SUCCEED_CODE = 200;
+            private boolean enable = false;
+            private List<Integer> succeedCodes = Collections.singletonList(DEFAULT_SUCCEED_CODE);
+        }
     }
 
 }

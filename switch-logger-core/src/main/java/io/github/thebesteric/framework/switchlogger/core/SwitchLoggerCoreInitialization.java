@@ -33,12 +33,12 @@ public class SwitchLoggerCoreInitialization extends SwitchLoggerInitialization {
     @Override
     public void start() {
         if (!properties.isEnable()) {
-            log.info("SWITCH LOGGER is Disabled");
+            log.info("Switch Logger: Disabled");
             return;
         }
 
-        log.info("Switch Logger Record Model is {}, Running Model is {}", properties.getModel(), properties.isAsync() ? "Async" : "Sync");
-        log.info("Switch Logger Track-Id generator is {}", properties.isSkyWalkingTrace() ? "SkyWalking" : "Local");
+        log.info("Switch Logger: Record Model is {}, Running Model is {}", properties.getModel(), properties.isAsync() ? "Async" : "Sync");
+        log.info("Switch Logger: Track-Id generator is {}", properties.isSkyWalkingTrace() ? "SkyWalking" : "Local");
 
         String projectPath = getProjectPath();
         // scanner @Controller and @SwitchLogger and so on
@@ -48,8 +48,16 @@ public class SwitchLoggerCoreInitialization extends SwitchLoggerInitialization {
 
         // print url_mapping to console
         if (log.isTraceEnabled()) {
-            log.info("Switch Logger Project Path is {}", projectPath);
-            SwitchLoggerFilterWrapper.URL_MAPPING.forEach((k, v) -> log.info("Switch Logger Scan {} => {}", k, v.getName()));
+            log.info("Switch Logger: Project Path is {}", projectPath);
+            SwitchLoggerFilterWrapper.URL_MAPPING.forEach((k, v) -> log.info("Switch Logger: Scan {} => {}", k, v.getName()));
+        }
+
+        if (properties.getRpc().getFeign().isEnable()) {
+            log.info("Switch Logger: Feign is Monitoring");
+        }
+
+        if (properties.getRpc().getForest().isEnable()) {
+            log.info("Switch Logger: Forest is Monitoring");
         }
     }
 }
