@@ -44,7 +44,6 @@
         <module>switch-logger-core</module>
         <module>switch-logger-redis</module>
         <module>switch-logger-mysql</module>
-        <module>switch-logger-test</module>
     </modules>
 
     <properties>
