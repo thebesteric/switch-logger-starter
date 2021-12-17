@@ -1,9 +1,11 @@
 package io.github.thebesteric.framework.switchlogger.test;
 
+import com.dtflys.forest.springboot.annotation.ForestScan;
 import io.github.thebesteric.framework.switchlogger.annotation.EnableSwitchLogger;
 import io.github.thebesteric.framework.switchlogger.core.processor.GlobalSuccessResponseProcessor;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -12,6 +14,8 @@ import java.util.Map;
 
 @SpringBootApplication
 @EnableSwitchLogger
+@EnableFeignClients
+@ForestScan(basePackages = "io.github.thebesteric.framework.switchlogger.test.service")
 public class Application {
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
