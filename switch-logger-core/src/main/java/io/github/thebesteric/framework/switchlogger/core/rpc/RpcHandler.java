@@ -55,7 +55,7 @@ public abstract class RpcHandler extends feign.Logger implements ApplicationCont
     }
 
     @Override
-    protected void log(String s, String s1, Object... objects) {
+    protected void log(String configKey, String format, Object... args) {
 
     }
 }

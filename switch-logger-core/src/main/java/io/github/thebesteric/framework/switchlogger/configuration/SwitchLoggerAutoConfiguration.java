@@ -168,7 +168,7 @@ public class SwitchLoggerAutoConfiguration {
         private ConfigurableApplicationContext applicationContext;
 
         @Bean
-        @ConditionalOnProperty(prefix = "sourceflag.switch-logger.rpc.feign", name = "enable", havingValue = "true")
+        @ConditionalOnProperty(prefix = "sourceflag.switch-logger.rpc", name = "feign.enable", havingValue = "true")
         @ConditionalOnClass(Logger.class)
         public Logger.Level feignLogLevel() {
             return Logger.Level.FULL;

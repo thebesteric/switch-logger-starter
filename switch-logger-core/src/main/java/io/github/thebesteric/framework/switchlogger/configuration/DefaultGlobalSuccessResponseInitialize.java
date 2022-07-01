@@ -9,6 +9,9 @@ import org.springframework.lang.NonNull;
 
 import java.util.Arrays;
 
+/**
+ * Default Global Success Response
+ */
 public class DefaultGlobalSuccessResponseInitialize implements SmartInitializingSingleton, ApplicationContextAware {
 
     private AbstractApplicationContext applicationContext;
@@ -25,7 +28,6 @@ public class DefaultGlobalSuccessResponseInitialize implements SmartInitializing
                     new SwitchLoggerProperties.GlobalSuccessResponse.ResponseEntity("code", "100")));
             defaultGlobalSuccessResponse.setMessageFields(Arrays.asList("message", "msg"));
             switchLoggerProperties.setGlobalSuccessResponse(defaultGlobalSuccessResponse);
-            System.out.println(1);
         }
     }
 

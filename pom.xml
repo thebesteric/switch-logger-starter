@@ -44,6 +44,8 @@
         <module>switch-logger-core</module>
         <module>switch-logger-redis</module>
         <module>switch-logger-mysql</module>
+        <module>switch-logger-feign-client</module>
+        <module>switch-logger-forest-client</module>
     </modules>
 
     <properties>
